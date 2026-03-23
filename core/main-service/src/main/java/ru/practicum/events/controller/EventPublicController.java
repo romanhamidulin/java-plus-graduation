@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.StatsClient;
+import ru.practicum.client.StatsClient;
 import ru.practicum.events.dto.EntityParam;
 import ru.practicum.events.dto.EventDto;
 import ru.practicum.events.dto.EventShortDto;
