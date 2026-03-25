@@ -1,7 +1,7 @@
 package ru.practicum.category.controllers;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +18,7 @@ public class CategoryPublicController {
     private final CategoryService service;
 
     @GetMapping
-    public List<CategoryDto> allCategories(@Min(0) @RequestParam(defaultValue = "0") Integer from,
+    public List<CategoryDto> allCategories(@PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                            @Positive @RequestParam(defaultValue = "10") Integer size) {
         return service.findAll(from, size);
     }
