@@ -1,7 +1,7 @@
 package ru.practicum.model;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.dto.EndpointHitDto;
+import ru.practicum.stats.dto.EndpointHitDto;
 
 @UtilityClass
 public class StatisticMapper {

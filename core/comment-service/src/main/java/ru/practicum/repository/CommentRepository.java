@@ -1,0 +1,34 @@
+package ru.practicum.repository;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import ru.practicum.model.Comment;
+import ru.practicum.enums.comment.CommentStatus;
+
+import java.util.List;
+import java.util.Set;
+
+public interface CommentRepository extends JpaRepository<Comment, Long> {
+    List<Comment> findByEventId(Long eventId, Pageable pageable);
+
+    List<Comment> findByEventIdAndStatus(Long eventId, CommentStatus commentStatus);
+
+    List<Comment> findAllByStatus(CommentStatus commentStatus);
+
+    List<Comment> findByEventIdInAndStatus(List<Long> eventIds, CommentStatus commentStatus);
+
+    List<Comment> findByAuthor_IdInAndStatus(List<Long> usersId, CommentStatus commentStatus);
+
+    @Query(value = """
+            SELECT c.comment_id, c.author_id, c.event_id, c.text, c.created_date
+            FROM comments AS c
+            WHERE c.event_id IN :ids AND c.comment_id IN (SELECT comment_id
+                                   FROM comments
+                                   WHERE event_id = c.event_id
+                                   ORDER BY created_date DESC
+                                   LIMIT 10);
+            """, nativeQuery = true)
+    List<Comment> findLastCommentsForManyEvents(@Param("ids") Set<Long> ids);
+}

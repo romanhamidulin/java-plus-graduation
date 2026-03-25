@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.repository.StatisticRepository;
-import ru.practicum.dto.EndpointHitDto;
-import ru.practicum.dto.ViewStats;
+import ru.practicum.stats.dto.EndpointHitDto;
+import ru.practicum.stats.dto.ViewStats;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.model.StatisticMapper;
 
