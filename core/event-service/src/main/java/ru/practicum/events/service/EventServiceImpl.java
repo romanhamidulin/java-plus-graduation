@@ -713,7 +713,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(
                 () -> new NotFoundException("Событие или пользователь с данным id не найдены, или событие недоступно к просмотру данным пользователем")
         );
-        return requestFeignClient.getRequestsByEventId(eventId);
+        return requestFeignClient.getRequestsByEventId(event.getId());
     }
 
     @Override
