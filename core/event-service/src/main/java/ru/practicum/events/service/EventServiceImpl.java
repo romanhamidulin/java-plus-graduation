@@ -1,8 +1,6 @@
 package ru.practicum.events.service;
 
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -57,6 +55,7 @@ public class EventServiceImpl implements EventService {
     private final RequestFeignClient requestFeignClient;
     private final StatsClient client;
     private final CommentFeignClient commentFeignClient;
+    private final ResponseEventBuilder responseEventBuilder;
 
     @Override
     public List<EventShortDto> getEventsByOwner(Long userId, Integer from, Integer size) {
@@ -69,36 +68,30 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventDto addEvent(Long userId, EventCreateDto eventCreateDto) {
         log.info("Валидация даты и времени события");
-        validateEventDate(eventCreateDto.getEventDate(), EventState.PENDING);
+
 
         Event event = EventMapper.toEvent(eventCreateDto);
-
-        log.info("Добавление инициатора события");
-        UserDto user = userFeignClient.getUserById(userId).orElseThrow(
-                () -> new NotFoundException("Пользователь с данным id не найден")
-        );
-        event.setInitiatorId(user.getId());
-
-        log.info("Добавление категории события");
-        Category category = categoryRepository.findById(eventCreateDto.getCategory()).orElseThrow(
-                () -> new NotFoundException("Категория с данным id не найдена")
-        );
-        event.setCategory(category);
-
-        log.info("Добавление локации события");
-        Location location = getOrSaveLocation(eventCreateDto.getLocation());
+        Location location = new Location();
+        location.setLat(eventCreateDto.getLocation().getLat());
+        location.setLon(eventCreateDto.getLocation().getLon());
         event.setLocation(location);
 
-        event.setState(EventState.PENDING);
-        event.setCreatedOn(LocalDateTime.now());
+        validateEventDate(eventCreateDto.getEventDate(), EventState.PENDING);
+
+
+        Category category = categoryRepository.findById(eventCreateDto.getCategory()).orElseThrow(
+                () -> new NotFoundException("Категория не найдена"));
+        event.setCategory(category);
+
+        UserDto initiator = userFeignClient.getUserById(userId).orElseThrow(
+                () -> new NotFoundException("Пользователь не найден"));
+        event.setInitiatorId(userId);
+
+        locationRepository.save(event.getLocation());
 
         event = eventRepository.save(event);
-        UserShortDto initiator = getUserShortDto(event.getInitiatorId());
-        EventDto res = EventMapper.toEventDto(event, initiator);
-        res.setConfirmedRequests((long) requestFeignClient.getRequestsCountByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED));
-        res.setComments(new ArrayList<>());
 
-        return res;
+        return responseEventBuilder.buildOneEventResponseDto(event, EventDto.class);
     }
 
     @Override
