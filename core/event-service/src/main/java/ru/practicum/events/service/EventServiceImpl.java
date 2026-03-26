@@ -532,6 +532,13 @@ public class EventServiceImpl implements EventService {
 
     }
 
+    @Override
+    public EventDto getEventByIdAnyState(Long eventId) {
+        Event event= eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие не найдено"));
+        return EventMapper.toEventDto(event);
+    }
+
     private void validateSearchParameters(List<Long> users, List<String> states,
                                           LocalDateTime rangeStart, LocalDateTime rangeEnd) {
         if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
