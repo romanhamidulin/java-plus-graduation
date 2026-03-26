@@ -30,7 +30,7 @@ public class EventMapper {
                         .lon(event.getLocation().getLon())
                         .build())
                 .state(event.getState())
-                .initiator(userFeignClient.getUserByIdShort(event.getInitiator()))
+                .initiator(userFeignClient.getUserByIdShort(event.getInitiatorId()))
                 .eventDate(event.getEventDate())
                 .createdOn(event.getCreatedOn())
                 .publishedOn(event.getPublishedOn());
@@ -50,7 +50,7 @@ public class EventMapper {
                 .confirmedRequests(confirmedRequest != null ? confirmedRequest : 0L)
                 .views(views != null ? views : 0L)
                 .paid(event.getPaid())
-                .initiator(userFeignClient.getUserByIdShort(event.getInitiator()))
+                .initiator(userFeignClient.getUserByIdShort(event.getInitiatorId()))
                 .countOfComments(countOfComments)
                 .eventDate(event.getEventDate());
 
@@ -85,7 +85,7 @@ public class EventMapper {
                 .views(0L)
                 .eventDate(event.getEventDate())
                 .paid(event.getPaid())
-                .initiator(userFeignClient.getUserByIdShort(event.getInitiator()));
+                .initiator(userFeignClient.getUserByIdShort(event.getInitiatorId()));
 
         if (event.getCategory() != null) {
             builder.category(CategoryMapper.mapToDto(event.getCategory()));
@@ -107,7 +107,7 @@ public class EventMapper {
                 .requestModeration(event.getRequestModeration())
                 .participantLimit(event.getParticipantLimit())
                 .location(LocationMapper.toLocationDto(event.getLocation()))
-                .initiator(userFeignClient.getUserByIdShort(event.getInitiator()))
+                .initiator(userFeignClient.getUserByIdShort(event.getInitiatorId()))
                 .state(event.getState())
                 .publishedOn(event.getPublishedOn())
                 .createdOn(event.getCreatedOn());

@@ -76,7 +76,7 @@ public class EventServiceImpl implements EventService {
         UserDto user = userFeignClient.getUserById(userId).orElseThrow(
                 () -> new NotFoundException("Пользователь с данным id не найден")
         );
-        event.setInitiator(user.getId());
+        event.setInitiatorId(user.getId());
 
         log.info("Добавление категории события");
         Category category = categoryRepository.findById(eventCreateDto.getCategory()).orElseThrow(
