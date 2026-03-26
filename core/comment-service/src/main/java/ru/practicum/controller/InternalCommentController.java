@@ -30,7 +30,7 @@ public class InternalCommentController implements CommentInternalApi {
         return comments;
     }
 
-    @GetMapping("/event/{eventId}")
+    @GetMapping("/event/{eventId}/all")
     public List<CommentDto> getCommentsByEventId(@PathVariable Long eventId) {
         log.info("Пришел GET запрос на /comments/event/{}", eventId);
         List<CommentDto> comments = commentService.getEventComments(eventId, 0, Integer.MAX_VALUE);

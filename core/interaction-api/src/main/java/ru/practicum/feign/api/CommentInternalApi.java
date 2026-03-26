@@ -13,7 +13,7 @@ public interface CommentInternalApi {
     @GetMapping("/event/last")
     List<CommentDto> getLastCommentsForEvents(@RequestParam(name = "ids") Set<Long> eventsId);
 
-    @GetMapping("/event/{eventId}")
+    @GetMapping("/event/{eventId}/all")
     List<CommentDto> getCommentsByEventId(@PathVariable("eventId") Long eventId);
 
     @GetMapping("/event/{eventId}")
