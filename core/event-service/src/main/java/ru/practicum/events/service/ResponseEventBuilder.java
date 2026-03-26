@@ -28,7 +28,6 @@ import java.util.*;
 @Component
 @RequiredArgsConstructor
 public class ResponseEventBuilder {
-    private final EventMapper eventMapper;
     private final RequestFeignClient requestFeignClient;
     private final CommentFeignClient commentFeignClient;
     private final UserFeignClient userFeignClient;
@@ -45,7 +44,7 @@ public class ResponseEventBuilder {
             dtoTemp.setInitiator(initiator);
             dto = type.cast(dtoTemp);
         } else {
-            EventShortDto dtoTemp = eventMapper.toEventShortDto(event,initiator);
+            EventShortDto dtoTemp = EventMapper.toEventShortDto(event,initiator);
             dtoTemp.setInitiator(initiator);
             dto = type.cast(dtoTemp);
         }
@@ -72,7 +71,7 @@ public class ResponseEventBuilder {
                 dtoTemp.setInitiator(new UserShortDto(initiator.getId(), initiator.getName()));
                 dtoById.put(event.getId(), type.cast(dtoTemp));
             } else {
-                EventShortDto dtoTemp = eventMapper.toEventShortDto(event,initiators);
+                EventShortDto dtoTemp = EventMapper.toEventShortDto(event,initiators);
                 dtoTemp.setInitiator(new UserShortDto(initiator.getId(), initiator.getName()));
                 dtoById.put(event.getId(), type.cast(dtoTemp));
             }
