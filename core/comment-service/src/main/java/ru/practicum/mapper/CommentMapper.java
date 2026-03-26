@@ -16,7 +16,7 @@ public class CommentMapper {
     public Comment toComment(NewCommentDto newCommentDto, Long author, Long event) {
         return Comment.builder()
                 .text(newCommentDto.getText())
-                .author(author)
+                .authorId(author)
                 .eventId(event)
                 .created(LocalDateTime.now())
                 .status(CommentStatus.PENDING)
@@ -28,7 +28,7 @@ public class CommentMapper {
                 .id(comment.getId())
                 .text(comment.getText())
                 .eventId(comment.getEventId() != null ? comment.getEventId() : null)
-                .authorId(comment.getAuthor() != null ? comment.getAuthor() : null)
+                .authorId(comment.getAuthorId() != null ? comment.getAuthorId() : null)
                 .created(comment.getCreated().format(FORMATTER))
                 .status(comment.getStatus().name())
                 .build();

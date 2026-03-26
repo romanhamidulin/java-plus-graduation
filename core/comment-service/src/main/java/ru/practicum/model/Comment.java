@@ -25,7 +25,7 @@ public class Comment {
     private Long eventId;
 
     @JoinColumn(name = "author_id")
-    private Long author;
+    private Long authorId;
 
     private LocalDateTime created = LocalDateTime.now();
 

@@ -21,7 +21,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     List<Comment> findByEventIdInAndStatus(List<Long> eventIds, CommentStatus commentStatus);
 
-    List<Comment> findByAuthor_IdInAndStatus(List<Long> usersId, CommentStatus commentStatus);
+    List<Comment> findByAuthorIdInAndStatus(List<Long> usersId, CommentStatus commentStatus);
 
     @Query(value = """
             SELECT c.comment_id, c.author_id, c.event_id, c.text, c.created_date

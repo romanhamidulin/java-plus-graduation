@@ -67,7 +67,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto updateComment(long authorId, long commentId, NewCommentDto updateCommentDto) {
         Comment commentToUpdate = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(String.format("Комментарий ID %s не найден", commentId)));
-        if (authorId != commentToUpdate.getAuthor()) {
+        if (authorId != commentToUpdate.getAuthorId()) {
             throw new ConflictException("Изменить комментарий может только его автор");
         }
         commentToUpdate.setText(updateCommentDto.getText());
@@ -82,7 +82,7 @@ public class CommentServiceImpl implements CommentService {
     public void deleteComment(long authorId, long commentId) {
         Comment commentToDelete = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(String.format("Комментарий ID %s не найден", commentId)));
-        if (authorId != commentToDelete.getAuthor()) {
+        if (authorId != commentToDelete.getAuthorId()) {
             throw new ConflictException("Удалить комментарий может только его автор");
         }
         commentRepository.delete(commentToDelete);
@@ -117,7 +117,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<CommentDto> adminPendigCommentList(List<Long> usersId) {
         if (usersId != null && !usersId.isEmpty()) {
-            return commentRepository.findByAuthor_IdInAndStatus(usersId, CommentStatus.PENDING)
+            return commentRepository.findByAuthorIdInAndStatus(usersId, CommentStatus.PENDING)
                     .stream()
                     .map(CommentMapper::toDto)
                     .toList();
