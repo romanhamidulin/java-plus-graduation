@@ -174,6 +174,7 @@ public class RequestServiceImpl implements RequestService {
         }
 
         request = requestRepository.save(request);
+        requestRepository.flush();
         return RequestMapper.toParticipationRequestDto(request);
     }
 
@@ -184,6 +185,7 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new NotFoundException("Запрос не найден или недоступен данному пользователю"));
         request.setStatus(RequestStatus.CANCELED);
         request = requestRepository.save(request);
+        requestRepository.flush();
         return RequestMapper.toParticipationRequestDto(request);
     }
 
