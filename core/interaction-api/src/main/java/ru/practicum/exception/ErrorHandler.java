@@ -132,19 +132,6 @@ public class ErrorHandler {
         return new ApiError(HttpStatus.CONFLICT.getReasonPhrase(), "Произошел конфликт данных", e.getMessage(), LocalDateTime.now());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getAllErrors().stream()
-                .map(error -> error.getDefaultMessage())
-                .collect(Collectors.joining(", "));
-        return new ApiError(
-                HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                "Validation failure",
-                message,
-                LocalDateTime.now()
-        );
-    }
 
     @ExceptionHandler(DuplicateDataException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
