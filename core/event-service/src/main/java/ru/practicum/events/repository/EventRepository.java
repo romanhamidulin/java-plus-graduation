@@ -22,7 +22,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
 
     @Query("""
         SELECT e FROM Event e
-        WHERE (COALESCE(:users) IS NULL OR e.initiator IN (:users))
+        WHERE (COALESCE(:users) IS NULL OR e.initiatorId IN (:users))
         AND (COALESCE(:states) IS NULL OR e.state IN (:states))
         AND (COALESCE(:categories) IS NULL OR e.category.id IN (:categories))
         AND (CAST(:rangeStart AS localdatetime) IS NULL OR e.eventDate >= :rangeStart)

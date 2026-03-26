@@ -45,7 +45,7 @@ public class Event {
     private Location location;
 
     @JoinColumn(name = "initiator_id")
-    private Long initiator;
+    private Long initiatorId;
 
     @Enumerated(EnumType.STRING)
     private EventState state;
