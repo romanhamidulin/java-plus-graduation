@@ -9,17 +9,19 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.NewCompilationDto;
 import ru.practicum.dto.compilation.UpdateCompilationRequest;
+import ru.practicum.dto.events.EventShortDto;
+import ru.practicum.dto.user.UserShortDto;
 import ru.practicum.compilation.mapper.CompilationMapper;
 import ru.practicum.compilation.model.Compilation;
 import ru.practicum.compilation.repository.CompilationRepository;
+import ru.practicum.events.mapper.EventMapper;
 import ru.practicum.events.model.Event;
 import ru.practicum.events.repository.EventRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.feign.client.UserFeignClient;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +31,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
+    private final UserFeignClient userFeignClient;  // Добавляем UserFeignClient
 
     @Override
     public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
@@ -43,7 +46,7 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
         return compilations.stream()
-                .map(CompilationMapper::toDto)
+                .map(this::toDtoWithEvents)
                 .collect(Collectors.toList());
     }
 
@@ -52,7 +55,7 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Подборка с id = " + compId + " не найдена"));
 
-        return CompilationMapper.toDto(compilation);
+        return toDtoWithEvents(compilation);
     }
 
     @Override
@@ -69,7 +72,7 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
         Compilation savedCompilation = compilationRepository.save(compilation);
-        return CompilationMapper.toDto(savedCompilation);
+        return toDtoWithEvents(savedCompilation);
     }
 
     @Override
@@ -113,6 +116,31 @@ public class CompilationServiceImpl implements CompilationService {
             }
         }
 
-        return CompilationMapper.toDto(compilation);
+        return toDtoWithEvents(compilation);
+    }
+
+    private CompilationDto toDtoWithEvents(Compilation compilation) {
+        List<EventShortDto> eventShortDtos = new ArrayList<>();
+
+        if (compilation.getEvents() != null && !compilation.getEvents().isEmpty()) {
+            eventShortDtos = compilation.getEvents().stream()
+                    .map(this::mapEventToShortDto)
+                    .collect(Collectors.toList());
+        }
+
+        return CompilationMapper.toDto(compilation, eventShortDtos);
+    }
+
+    private EventShortDto mapEventToShortDto(Event event) {
+        UserShortDto initiator = getUserShortDto(event.getInitiatorId());
+        return EventMapper.toEventShortDto(event, initiator);
+    }
+
+    private UserShortDto getUserShortDto(Long userId) {
+        try {
+            return userFeignClient.getUserByIdShort(userId);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

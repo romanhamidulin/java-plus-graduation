@@ -7,14 +7,13 @@ import ru.practicum.dto.events.EventCreateDto;
 import ru.practicum.dto.events.EventDto;
 import ru.practicum.dto.events.EventShortDto;
 import ru.practicum.dto.events.LocationDto;
+import ru.practicum.dto.user.UserShortDto;
 import ru.practicum.events.model.Event;
-import ru.practicum.feign.client.UserFeignClient;
 
 @UtilityClass
 public class EventMapper {
-    private final UserFeignClient userFeignClient = null;
 
-    public EventDto mapToDto(Event event, Long confirmedRequest, Long views) {
+    public EventDto mapToDto(Event event, Long confirmedRequest, Long views, UserShortDto initiator) {
         EventDto.EventDtoBuilder builder = EventDto.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -30,7 +29,7 @@ public class EventMapper {
                         .lon(event.getLocation().getLon())
                         .build())
                 .state(event.getState())
-                .initiator(userFeignClient.getUserByIdShort(event.getInitiatorId()))
+                .initiator(initiator)
                 .eventDate(event.getEventDate())
                 .createdOn(event.getCreatedOn())
                 .publishedOn(event.getPublishedOn());
@@ -42,7 +41,7 @@ public class EventMapper {
         return builder.build();
     }
 
-    public static EventShortDto mapToShortDto(Event event, Long confirmedRequest, Long views, Integer countOfComments) {
+    public static EventShortDto mapToShortDto(Event event, Long confirmedRequest, Long views, Integer countOfComments, UserShortDto initiator) {
         EventShortDto.EventShortDtoBuilder builder = EventShortDto.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -50,7 +49,7 @@ public class EventMapper {
                 .confirmedRequests(confirmedRequest != null ? confirmedRequest : 0L)
                 .views(views != null ? views : 0L)
                 .paid(event.getPaid())
-                .initiator(userFeignClient.getUserByIdShort(event.getInitiatorId()))
+                .initiator(initiator)
                 .countOfComments(countOfComments)
                 .eventDate(event.getEventDate());
 
@@ -76,7 +75,7 @@ public class EventMapper {
         return event;
     }
 
-    public EventShortDto toEventShortDto(Event event) {
+    public EventShortDto toEventShortDto(Event event,UserShortDto initiator) {
         EventShortDto.EventShortDtoBuilder builder = EventShortDto.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -85,7 +84,7 @@ public class EventMapper {
                 .views(0L)
                 .eventDate(event.getEventDate())
                 .paid(event.getPaid())
-                .initiator(userFeignClient.getUserByIdShort(event.getInitiatorId()));
+                .initiator(initiator);
 
         if (event.getCategory() != null) {
             builder.category(CategoryMapper.mapToDto(event.getCategory()));
@@ -94,7 +93,7 @@ public class EventMapper {
         return builder.build();
     }
 
-    public EventDto toEventDto(Event event) {
+    public EventDto toEventDto(Event event,UserShortDto initiator) {
         EventDto.EventDtoBuilder builder = EventDto.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -107,7 +106,7 @@ public class EventMapper {
                 .requestModeration(event.getRequestModeration())
                 .participantLimit(event.getParticipantLimit())
                 .location(LocationMapper.toLocationDto(event.getLocation()))
-                .initiator(userFeignClient.getUserByIdShort(event.getInitiatorId()))
+                .initiator(initiator)
                 .state(event.getState())
                 .publishedOn(event.getPublishedOn())
                 .createdOn(event.getCreatedOn());

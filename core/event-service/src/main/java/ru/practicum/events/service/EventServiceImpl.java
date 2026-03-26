@@ -16,6 +16,7 @@ import ru.practicum.client.StatsClient;
 import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.dto.request.ParticipationRequestDto;
+import ru.practicum.dto.user.UserShortDto;
 import ru.practicum.enums.comment.CommentStatus;
 import ru.practicum.enums.event.AdminUpdateStateAction;
 import ru.practicum.enums.request.RequestStatus;
@@ -92,9 +93,9 @@ public class EventServiceImpl implements EventService {
         event.setCreatedOn(LocalDateTime.now());
 
         event = eventRepository.save(event);
-        EventDto res = EventMapper.toEventDto(event);
+        UserShortDto initiator = getUserShortDto(event.getInitiatorId());
+        EventDto res = EventMapper.toEventDto(event, initiator);
         res.setConfirmedRequests((long) requestFeignClient.getRequestsCountByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED));
-
         res.setComments(new ArrayList<>());
 
         return res;
@@ -110,10 +111,12 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException(
                         "Событие или пользователь с данным id не найдены, или событие недоступно к просмотру данным пользователем"));
 
-        EventDto result = EventMapper.toEventDto(event);
+        UserShortDto initiator = getUserShortDto(event.getInitiatorId());
+        EventDto result = EventMapper.toEventDto(event, initiator);
         enrichEventDtoWithAdditionalData(result, eventId);
 
         return result;
+
     }
 
     @Override
@@ -134,7 +137,8 @@ public class EventServiceImpl implements EventService {
         updateEventFields(event, eventUpdateDto);
 
         event = eventRepository.save(event);
-        EventDto result = EventMapper.toEventDto(event);
+        UserShortDto initiator = getUserShortDto(event.getInitiatorId());
+        EventDto result = EventMapper.toEventDto(event,initiator);
         enrichEventDtoWithAdditionalData(result, eventId);
 
         return result;
@@ -303,7 +307,8 @@ public class EventServiceImpl implements EventService {
         List<CommentDto> comments = commentFeignClient.getCommentsByEventIdAndStatus(
                 eventId, CommentStatus.PUBLISHED);
 
-        EventDto eventDto = EventMapper.mapToDto(event, countOfConfirmed, countOfViews);
+        UserShortDto initiator = getUserShortDto(event.getInitiatorId());
+        EventDto eventDto = EventMapper.mapToDto(event, countOfConfirmed, countOfViews,initiator);
         eventDto.setComments(comments);
 
         EndpointHitDto hitDto = EndpointHitDto.builder()
@@ -326,6 +331,16 @@ public class EventServiceImpl implements EventService {
         }
 
         return event;
+    }
+
+    private UserShortDto getUserShortDto(Long userId) {
+        try {
+            return userFeignClient.getUserByIdShort(userId);
+        } catch (Exception e) {
+            log.error("Ошибка при получении пользователя с id {}: {}", userId, e.getMessage());
+            // Возвращаем заглушку или null, в зависимости от требований
+            return null;
+        }
     }
 
     private Long getViews(Long eventId) {
@@ -383,7 +398,8 @@ public class EventServiceImpl implements EventService {
             Long confirmedR = confirmedRequests.getOrDefault(event.getId(), 0L);
             Long view = views.getOrDefault(event.getId(), 0L);
             int commentCount = comments.getOrDefault(event.getId(), Collections.emptyList()).size();
-            return EventMapper.mapToShortDto(event, confirmedR, view, commentCount);
+            UserShortDto initiator = getUserShortDto(event.getInitiatorId());
+            return EventMapper.mapToShortDto(event, confirmedR, view, commentCount, initiator);
         }).toList();
     }
 
@@ -463,7 +479,8 @@ public class EventServiceImpl implements EventService {
         return events.stream().map(event -> {
             Long confirmedR = confirmedRequests.getOrDefault(event.getId(), 0L);
             Long view = views.getOrDefault(event.getId(), 0L);
-            EventDto dto = EventMapper.mapToDto(event, confirmedR, view);
+            UserShortDto initiator = getUserShortDto(event.getInitiatorId());
+            EventDto dto = EventMapper.mapToDto(event, confirmedR, view,initiator);
 
             List<CommentDto> comments = commentsMap.get(event.getId());
             dto.setComments(comments != null ? comments : Collections.emptyList());
@@ -509,8 +526,8 @@ public class EventServiceImpl implements EventService {
 
         Event updatedEvent = eventRepository.save(event);
         log.info("Событие с id = {} успешно обновлено администратором", eventId);
-
-        EventDto result = EventMapper.toEventDto(updatedEvent);
+        UserShortDto initiator = getUserShortDto(event.getInitiatorId());
+        EventDto result = EventMapper.toEventDto(updatedEvent,initiator);
 
         int confirmedRequestsCount = requestFeignClient.getRequestsCountByEventIdAndStatus(
                 eventId, RequestStatus.CONFIRMED);
@@ -536,7 +553,8 @@ public class EventServiceImpl implements EventService {
     public EventDto getEventByIdAnyState(Long eventId) {
         Event event= eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие не найдено"));
-        return EventMapper.toEventDto(event);
+        UserShortDto initiator = getUserShortDto(event.getInitiatorId());
+        return EventMapper.toEventDto(event,initiator);
     }
 
     private void validateSearchParameters(List<Long> users, List<String> states,
