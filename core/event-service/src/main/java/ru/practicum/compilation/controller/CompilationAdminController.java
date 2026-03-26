@@ -1,6 +1,7 @@
 package ru.practicum.compilation.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,7 @@ public class CompilationAdminController {
     }
 
     @PatchMapping("/{compId}")
-    public CompilationDto updateCompilation(@PathVariable Long compId,
+    public CompilationDto updateCompilation(@Min(1) @PathVariable Long compId,
                                             @Valid @RequestBody UpdateCompilationRequest updateCompilationRequest) {
         return compilationService.updateCompilation(compId, updateCompilationRequest);
     }

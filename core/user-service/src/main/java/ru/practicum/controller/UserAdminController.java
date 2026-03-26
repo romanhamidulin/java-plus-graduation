@@ -1,6 +1,7 @@
 package ru.practicum.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -21,8 +22,8 @@ public class UserAdminController {
 
     @GetMapping
     public List<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
-                                  @RequestParam(defaultValue = "0") int from,
-                                  @RequestParam(defaultValue = "10") int size
+                                  @Min(0) @RequestParam(defaultValue = "0") int from,
+                                  @Min(1) @RequestParam(defaultValue = "10") int size
     ) {
         return userService.getUsers(new UserRequest(ids,from,size));
     }
@@ -35,7 +36,7 @@ public class UserAdminController {
 
     @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable Long id) {
+    public void deleteUser(@Min(1) @PathVariable Long id) {
         userService.deleteUser(id);
     }
 }
