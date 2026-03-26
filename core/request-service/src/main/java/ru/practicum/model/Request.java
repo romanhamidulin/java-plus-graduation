@@ -22,7 +22,7 @@ public class Request {
     private Long eventId;
 
     @JoinColumn(name = "requester_id")
-    private Long requester;
+    private Long requesterId;
 
     @Column(name = "created_at")
     private LocalDateTime createdOn;

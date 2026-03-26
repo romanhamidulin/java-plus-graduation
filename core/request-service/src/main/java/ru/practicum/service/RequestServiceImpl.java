@@ -164,7 +164,7 @@ public class RequestServiceImpl implements RequestService {
 
         Request request = new Request();
         request.setEventId(event.getId());
-        request.setRequester(user.getId());
+        request.setRequesterId(user.getId());
         request.setCreatedOn(LocalDateTime.now());
 
         if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
