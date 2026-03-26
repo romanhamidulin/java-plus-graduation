@@ -5,10 +5,9 @@ import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.enums.request.RequestStatus;
-import ru.practicum.model.Request;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface RequestService {
@@ -31,4 +30,8 @@ public interface RequestService {
     ParticipationRequestDto changeRequestStatus(Long requestId, RequestStatus status);
 
     Optional<ParticipationRequestDto> findByRequesterIdAndEventIdAndStatus(long authorId, long eventId, RequestStatus requestStatus);
+
+    List<ParticipationRequestDto> findAllByStatusAndEventId(RequestStatus status, Long eventId);
+
+    Map<Long, Long> getConfirmedRequestsCountsForEvents(List<Long> eventIds);
 }

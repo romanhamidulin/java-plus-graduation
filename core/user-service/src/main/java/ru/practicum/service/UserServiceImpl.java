@@ -61,4 +61,8 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с Id " + userId + " не найден"));
         return UserMapper.toUserDto(user);
     }
+    @Override
+    public List<Long> findExistingUserIds(List<Long> userIds) {
+        return userRepository.findExistingUserIds(userIds);
+    }
 }

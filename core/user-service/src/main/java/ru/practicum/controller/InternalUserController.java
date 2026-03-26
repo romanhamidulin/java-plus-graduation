@@ -2,12 +2,11 @@ package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.user.UserDto;
 import ru.practicum.service.UserService;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -22,5 +21,11 @@ public class InternalUserController {
         UserDto user = userService.getUserById(userId);
         log.info("Получен пользователь с id {}: {}", userId, user);
         return user;
+    }
+
+    @GetMapping("/existing")
+    public List<Long> findExistingUserIds(@RequestParam("ids") List<Long> userIds) {
+        log.debug("Finding existing user IDs from: {}", userIds);
+        return userService.findExistingUserIds(userIds);
     }
 }

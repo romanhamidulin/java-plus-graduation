@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface StatisticRepository extends JpaRepository<Statistic, Long> {
     @Query("""
-            SELECT new ru.practicum.dto.ViewStats(s.app, s.uri, COUNT(DISTINCT s.ip))
+            SELECT new ru.practicum.stats.dto.ViewStats(s.app, s.uri, COUNT(DISTINCT s.ip))
             FROM Statistic AS s
             WHERE s.requestDate BETWEEN :start AND :end
             AND s.uri IN :uris
@@ -23,7 +23,7 @@ public interface StatisticRepository extends JpaRepository<Statistic, Long> {
                                           @Param("uris") List<String> uris);
 
     @Query("""
-            SELECT new ru.practicum.dto.ViewStats(s.app, s.uri, COUNT(DISTINCT s.ip))
+            SELECT new ru.practicum.stats.dto.ViewStats(s.app, s.uri, COUNT(DISTINCT s.ip))
             FROM Statistic AS s
             WHERE s.requestDate BETWEEN :start AND :end
             GROUP BY s.app, s.uri
@@ -33,7 +33,7 @@ public interface StatisticRepository extends JpaRepository<Statistic, Long> {
                                  @Param("end") LocalDateTime end);
 
     @Query("""
-            SELECT new ru.practicum.dto.ViewStats(s.app, s.uri, COUNT(s.ip))
+            SELECT new ru.practicum.stats.dto.ViewStats(s.app, s.uri, COUNT(s.ip))
             FROM Statistic AS s
             WHERE s.requestDate BETWEEN :start AND :end
             AND s.uri IN :uris
@@ -45,7 +45,7 @@ public interface StatisticRepository extends JpaRepository<Statistic, Long> {
                                              @Param("uris") List<String> uris);
 
     @Query("""
-            SELECT new ru.practicum.dto.ViewStats(s.app, s.uri, COUNT(s.ip))
+            SELECT new ru.practicum.stats.dto.ViewStats(s.app, s.uri, COUNT(s.ip))
             FROM Statistic AS s
             WHERE s.requestDate BETWEEN :start AND :end
             GROUP BY s.app, s.uri

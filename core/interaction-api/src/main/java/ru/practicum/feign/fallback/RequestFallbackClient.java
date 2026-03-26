@@ -7,8 +7,9 @@ import ru.practicum.enums.request.RequestStatus;
 import ru.practicum.exception.ServiceUnavailableException;
 import ru.practicum.feign.api.RequestInternalApi;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class RequestFallbackClient implements RequestInternalApi {
@@ -32,6 +33,21 @@ public class RequestFallbackClient implements RequestInternalApi {
 
     @Override
     public ParticipationRequestDto updateRequestStatus(Long requestId, RequestStatus status) {
+        throw new ServiceUnavailableException(SERVICE_NAME);
+    }
+
+    @Override
+    public Optional<ParticipationRequestDto> findByRequesterIdAndEventIdAndStatus(long requesterId, long eventId, RequestStatus status) {
+        throw new ServiceUnavailableException(SERVICE_NAME);
+    }
+
+    @Override
+    public List<ParticipationRequestDto> findAllByStatusAndEvent_Id(RequestStatus status, Long eventId) {
+        throw new ServiceUnavailableException(SERVICE_NAME);
+    }
+
+    @Override
+    public Map<Long, Long> getConfirmedRequestsCountsForEvents(List<Long> eventIds) {
         throw new ServiceUnavailableException(SERVICE_NAME);
     }
 }

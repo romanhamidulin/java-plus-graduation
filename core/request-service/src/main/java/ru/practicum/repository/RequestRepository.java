@@ -33,7 +33,11 @@ public interface RequestRepository extends JpaRepository<Request, Long>, Queryds
     List<ConfirmedRequests> countConfirmedRequestsByEvents(@Param("status") RequestStatus status,
                                                            @Param("eventIds") List<Long> eventIds);
 
-
+    @Query("SELECT new ru.practicum.dto.request.ConfirmedRequests(r.eventId, COUNT(r)) " +
+            "FROM Request r " +
+            "WHERE r.eventId IN :eventIds AND r.status = 'CONFIRMED' " +
+            "GROUP BY r.eventId")
+    List<ConfirmedRequests> findConfirmedRequestsCountsByEventIds(@Param("eventIds") List<Long> eventIds);
 
     List<Request> findAllByEventId(Long eventId);
 

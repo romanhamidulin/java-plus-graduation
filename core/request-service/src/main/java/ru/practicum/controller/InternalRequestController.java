@@ -12,6 +12,7 @@ import ru.practicum.service.RequestService;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -22,28 +23,32 @@ public class InternalRequestController implements RequestInternalApi {
 
     private final RequestService requestService;
 
+    @Override
     @GetMapping("/event/{eventId}")
     public List<ParticipationRequestDto> getRequestsByEventId(@PathVariable Long eventId) {
-        List<ParticipationRequestDto> requests = requestService.getRequestsByEventId(eventId);
-        return requests;
+        log.debug("Getting requests for event: {}", eventId);
+        return requestService.getRequestsByEventId(eventId);
     }
 
+    @Override
     @GetMapping("/event/{eventId}/count")
     public int getRequestsCountByEventIdAndStatus(@PathVariable Long eventId, @RequestParam(name = "status") RequestStatus status) {
-        int count = requestService.getRequestsCountByEventIdAndStatus(eventId, status);
-        return count;
+        log.debug("Getting requests count for event: {}, status: {}", eventId, status);
+        return requestService.getRequestsCountByEventIdAndStatus(eventId, status);
     }
 
+    @Override
     @GetMapping("/confirmed")
     public List<ConfirmedRequests> getConfirmedRequestsByEventId(@RequestParam(name = "ids") List<Long> eventsIds) {
-        List<ConfirmedRequests> confirmedRequests = requestService.getConfirmedRequestsByEventId(eventsIds);
-        return confirmedRequests;
+        log.debug("Getting confirmed requests for events: {}", eventsIds);
+        return requestService.getConfirmedRequestsByEventId(eventsIds);
     }
 
+    @Override
     @PutMapping("/{requestId}/confirm")
     public ParticipationRequestDto updateRequestStatus(@PathVariable Long requestId, @RequestBody RequestStatus status) {
-        ParticipationRequestDto request = requestService.changeRequestStatus(requestId, status);
-        return request;
+        log.debug("Updating request: {} status to: {}", requestId, status);
+        return requestService.changeRequestStatus(requestId, status);
     }
 
     @Override
@@ -53,7 +58,27 @@ public class InternalRequestController implements RequestInternalApi {
             @RequestParam("eventId") long eventId,
             @RequestParam("status") RequestStatus status) {
 
+        log.debug("Finding request by requesterId: {}, eventId: {}, status: {}", requesterId, eventId, status);
 
         return requestService.findByRequesterIdAndEventIdAndStatus(requesterId, eventId, status);
+    }
+
+    @Override
+    @GetMapping("/by-status-and-event")
+    public List<ParticipationRequestDto> findAllByStatusAndEvent_Id(
+            @RequestParam("status") RequestStatus status,
+            @RequestParam("eventId") Long eventId) {
+
+        log.debug("Finding all requests by status: {} and eventId: {}", status, eventId);
+
+        return requestService.findAllByStatusAndEventId(status, eventId);
+    }
+
+    @Override
+    @GetMapping("/counts")
+    public Map<Long, Long> getConfirmedRequestsCountsForEvents(@RequestParam("ids") List<Long> eventIds) {
+        log.debug("Getting confirmed requests counts for events: {}", eventIds);
+
+        return requestService.getConfirmedRequestsCountsForEvents(eventIds);
     }
 }

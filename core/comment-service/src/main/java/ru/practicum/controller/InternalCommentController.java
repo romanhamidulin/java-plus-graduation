@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.comment.CommentDto;
+import ru.practicum.enums.comment.CommentStatus;
 import ru.practicum.feign.api.CommentInternalApi;
+import ru.practicum.mapper.CommentMapper;
+import ru.practicum.repository.CommentRepository;
 import ru.practicum.service.CommentService;
 
 import java.util.List;
@@ -17,6 +20,7 @@ import java.util.Set;
 public class InternalCommentController implements CommentInternalApi {
 
     private final CommentService commentService;
+    private final CommentRepository commentRepository;
 
     @GetMapping("/event/last")
     public List<CommentDto> getLastCommentsForEvents(@RequestParam(name = "ids") Set<Long> eventsId) {
@@ -32,5 +36,24 @@ public class InternalCommentController implements CommentInternalApi {
         List<CommentDto> comments = commentService.getEventComments(eventId, 0, Integer.MAX_VALUE);
         log.info("Для мероприятия с id {} нашлись комментарии: {}", eventId, comments);
         return comments;
+    }
+
+    @GetMapping("/event/{eventId}")
+    public List<CommentDto> getCommentsByEventIdAndStatus(
+            @PathVariable("eventId") Long eventId,
+            @RequestParam("status") CommentStatus status) {
+
+        return commentRepository.findByEventIdAndStatus(eventId, status)
+                .stream()
+                .map(CommentMapper::toDto)
+                .toList();
+    }
+
+    @GetMapping("/event/{eventId}/count")
+    public long getCommentsCountByEventIdAndStatus(
+            @PathVariable("eventId") Long eventId,
+            @RequestParam("status") CommentStatus status) {
+
+        return commentRepository.countByEventIdAndStatus(eventId, status);
     }
 }

@@ -23,10 +23,8 @@ import ru.practicum.enums.request.RequestStatus;
 import ru.practicum.repository.RequestRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -229,5 +227,29 @@ public class RequestServiceImpl implements RequestService {
 
         return requestRepository.findByRequesterIdAndEventIdAndStatus(requesterId, eventId, status)
                 .map(RequestMapper::toParticipationRequestDto);
+    }
+
+    @Override
+    public List<ParticipationRequestDto> findAllByStatusAndEventId(RequestStatus status, Long eventId) {
+        log.debug("Finding all requests by status: {} and eventId: {}", status, eventId);
+
+        return requestRepository.findAllByStatusAndEvent_Id(status, eventId)
+                .stream()
+                .map(RequestMapper::toParticipationRequestDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<Long, Long> getConfirmedRequestsCountsForEvents(List<Long> eventIds) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return requestRepository.findConfirmedRequestsCountsByEventIds(eventIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        ConfirmedRequests::getEvent,
+                        ConfirmedRequests::getCount
+                ));
     }
 }

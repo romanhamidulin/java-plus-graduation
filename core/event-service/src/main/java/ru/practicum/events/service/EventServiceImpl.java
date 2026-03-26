@@ -13,17 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.client.StatsClient;
-import ru.practicum.dto.request.ConfirmedRequests;
 import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.enums.comment.CommentStatus;
 import ru.practicum.enums.event.AdminUpdateStateAction;
 import ru.practicum.enums.request.RequestStatus;
-import ru.practicum.comment.mapper.CommentMapper;
-import ru.practicum.comment.model.Comment;
-import ru.practicum.comment.model.CommentStatus;
-import ru.practicum.comment.repository.CommentRepository;
 import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.dto.events.*;
 import ru.practicum.dto.user.UserDto;
@@ -39,12 +34,9 @@ import ru.practicum.exception.*;
 import ru.practicum.feign.client.CommentFeignClient;
 import ru.practicum.feign.client.RequestFeignClient;
 import ru.practicum.feign.client.UserFeignClient;
-import ru.practicum.request.model.RequestStatus;
-import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stats.dto.EndpointHitDto;
 import ru.practicum.stats.dto.ViewStats;
-import ru.practicum.user.model.User;
-import ru.practicum.user.repository.UserRepository;
+import ru.practicum.events.model.QEvent;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -113,19 +105,15 @@ public class EventServiceImpl implements EventService {
         if (eventId == null || userId == null) {
             throw new ValidationException("Id должен быть указан");
         }
-        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(
-                () -> new NotFoundException("Событие или пользователь с данным id не найдены, или событие недоступно к просмотру данным пользователем")
-        );
-        EventDto res = EventMapper.toEventDto(event);
 
-        res.setConfirmedRequests((long) requestFeignClient.getRequestsCountByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED));
+        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
+                .orElseThrow(() -> new NotFoundException(
+                        "Событие или пользователь с данным id не найдены, или событие недоступно к просмотру данным пользователем"));
 
-        List<CommentDto> comments = commentRepository.findByEventIdAndStatus(eventId, CommentStatus.PUBLISHED).stream()
-                .map(CommentMapper::toDto)
-                .toList();
-        res.setComments(comments);
+        EventDto result = EventMapper.toEventDto(event);
+        enrichEventDtoWithAdditionalData(result, eventId);
 
-        return res;
+        return result;
     }
 
     @Override
@@ -134,38 +122,57 @@ public class EventServiceImpl implements EventService {
         if (eventId == null || userId == null) {
             throw new ValidationException("Id должен быть указан");
         }
-        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(
-                () -> new NotFoundException("Событие или пользователь с данным id не найдены, или событие недоступно к редактированию данным пользователем")
-        );
+
+        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
+                .orElseThrow(() -> new NotFoundException(
+                        "Событие или пользователь с данным id не найдены, или событие недоступно к редактированию данным пользователем"));
+
         if (event.getState().equals(EventState.PUBLISHED)) {
             throw new EventConflictException("Изменить можно только отмененные события или события в состоянии ожидания модерации");
         }
+
+        updateEventFields(event, eventUpdateDto);
+
+        event = eventRepository.save(event);
+        EventDto result = EventMapper.toEventDto(event);
+        enrichEventDtoWithAdditionalData(result, eventId);
+
+        return result;
+    }
+
+    private void updateEventFields(Event event, EventUpdateDto eventUpdateDto) {
         if (eventUpdateDto.getEventDate() != null) {
             log.info("Валидация новых даты и времени события");
             validateEventDate(eventUpdateDto.getEventDate(), event.getState());
             log.info("Обновление даты и времени события");
             event.setEventDate(eventUpdateDto.getEventDate());
         }
+
         if (eventUpdateDto.getTitle() != null) {
             log.info("Обновление заголовка события");
             event.setTitle(eventUpdateDto.getTitle());
         }
+
         if (eventUpdateDto.getAnnotation() != null) {
             log.info("Обновление аннотации события");
             event.setAnnotation(eventUpdateDto.getAnnotation());
         }
+
         if (eventUpdateDto.getDescription() != null) {
             log.info("Обновление описания события");
             event.setDescription(eventUpdateDto.getDescription());
         }
+
         if (eventUpdateDto.getPaid() != null) {
             log.info("Обновление флага платности события");
             event.setPaid(eventUpdateDto.getPaid());
         }
+
         if (eventUpdateDto.getRequestModeration() != null) {
             log.info("Обновление признака премодерации заявок на участие");
             event.setRequestModeration(eventUpdateDto.getRequestModeration());
         }
+
         if (eventUpdateDto.getParticipantLimit() != null) {
             log.info("Обновление лимита пользователей собятия");
             event.setParticipantLimit(eventUpdateDto.getParticipantLimit());
@@ -173,16 +180,17 @@ public class EventServiceImpl implements EventService {
 
         if (eventUpdateDto.getCategory() != null) {
             log.info("Обновление категории события");
-            Category category = categoryRepository.findById(eventUpdateDto.getCategory()).orElseThrow(
-                    () -> new NotFoundException("Категория с данным id не найдена")
-            );
+            Category category = categoryRepository.findById(eventUpdateDto.getCategory())
+                    .orElseThrow(() -> new NotFoundException("Категория с данным id не найдена"));
             event.setCategory(category);
         }
+
         if (eventUpdateDto.getLocation() != null) {
             log.info("Обновление локации события");
             Location location = getOrSaveLocation(eventUpdateDto.getLocation());
             event.setLocation(location);
         }
+
         if (eventUpdateDto.getStateAction() != null) {
             switch (eventUpdateDto.getStateAction()) {
                 case SEND_TO_REVIEW:
@@ -193,16 +201,6 @@ public class EventServiceImpl implements EventService {
                     break;
             }
         }
-        event = eventRepository.save(event);
-        EventDto res = EventMapper.toEventDto(event);
-        res.setConfirmedRequests((long) requestFeignClient.getRequestsCountByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED));
-
-        List<CommentDto> comments = commentRepository.findByEventIdAndStatus(eventId, CommentStatus.PUBLISHED).stream()
-                .map(CommentMapper::toDto)
-                .toList();
-        res.setComments(comments);
-
-        return res;
     }
 
     private void validateEventDate(LocalDateTime eventDate, EventState currentState) {
@@ -234,6 +232,22 @@ public class EventServiceImpl implements EventService {
         );
     }
 
+    private void enrichEventDtoWithAdditionalData(EventDto eventDto, Long eventId) {
+        try {
+            int confirmedRequestsCount = requestFeignClient.getRequestsCountByEventIdAndStatus(
+                    eventId, RequestStatus.CONFIRMED);
+            eventDto.setConfirmedRequests((long) confirmedRequestsCount);
+
+            List<CommentDto> comments = commentFeignClient.getCommentsByEventIdAndStatus(
+                    eventId, CommentStatus.PUBLISHED);
+            eventDto.setComments(comments);
+
+        } catch (Exception e) {
+            log.error("Error fetching additional data for event: {}", eventId, e);
+            eventDto.setConfirmedRequests(0L);
+            eventDto.setComments(List.of());
+        }
+    }
 
     @Override
     public List<EventShortDto> allEvents(EntityParam params, String ip) {
@@ -247,8 +261,11 @@ public class EventServiceImpl implements EventService {
         Pageable pageable = PageRequest.of(params.getFrom() / params.getSize(), params.getSize());
         List<Event> events = eventRepository.findAll(expression, pageable).getContent();
 
-        List<EventShortDto> shortDtos = buildEvents(events);
+        if (params.getOnlyAvailable() != null && params.getOnlyAvailable()) {
+            events = filterAvailableEvents(events);
+        }
 
+        List<EventShortDto> shortDtos = buildEvents(events);
 
         EndpointHitDto hitDto = EndpointHitDto.builder()
                 .app("main-service")
@@ -265,6 +282,17 @@ public class EventServiceImpl implements EventService {
         return shortDtos.stream().sorted(Comparator.comparing(EventShortDto::getViews)).toList().reversed();
     }
 
+    private List<Event> filterAvailableEvents(List<Event> events) {
+        return events.stream()
+                .filter(event -> {
+                    int confirmedRequests = requestFeignClient.getRequestsCountByEventIdAndStatus(
+                            event.getId(), RequestStatus.CONFIRMED);
+                    return event.getParticipantLimit() == 0 ||
+                            confirmedRequests < event.getParticipantLimit();
+                })
+                .collect(Collectors.toList());
+    }
+
     @Override
     public EventDto eventById(Long eventId, String ip) {
         Event event = checkEvent(eventId);
@@ -272,9 +300,8 @@ public class EventServiceImpl implements EventService {
         Long countOfConfirmed = countOfConfirmedInt.longValue();
         Long countOfViews = getViews(eventId);
 
-        List<CommentDto> comments = commentRepository.findByEventIdAndStatus(eventId, CommentStatus.PUBLISHED).stream()
-                .map(CommentMapper::toDto)
-                .toList();
+        List<CommentDto> comments = commentFeignClient.getCommentsByEventIdAndStatus(
+                eventId, CommentStatus.PUBLISHED);
 
         EventDto eventDto = EventMapper.mapToDto(event, countOfConfirmed, countOfViews);
         eventDto.setComments(comments);
@@ -341,45 +368,40 @@ public class EventServiceImpl implements EventService {
             predicate = predicate.and(event.eventDate.after(LocalDateTime.now()));
         }
 
-        if (param.getOnlyAvailable() != null && param.getOnlyAvailable()) {
-            QRequest request = QRequest.request;
-
-            Expression<Integer> confirmedRequestsCount = JPAExpressions
-                    .select(request.count().intValue())
-                    .from(request)
-                    .where(request.event.id.eq(event.id)
-                            .and(request.status.eq(RequestStatus.CONFIRMED)));
-
-            predicate = predicate.and(event.participantLimit.gt(confirmedRequestsCount)
-                    .or(event.participantLimit.eq(0)));
-        }
-
         return predicate;
     }
 
     private List<EventShortDto> buildEvents(List<Event> events) {
         List<Long> eventIds = events.stream().map(Event::getId).toList();
 
-        Map<Long, Long> confirmedRequests = requestRepository
-                .countConfirmedRequestsByEvents(RequestStatus.CONFIRMED, eventIds)
-                .stream()
-                .collect(Collectors.toMap(
-                        ConfirmedRequests::getEvent,
-                        ConfirmedRequests::getCount,
-                        (count1, count2) -> count1 + count2
-                ));
-
-
+        Map<Long, Long> confirmedRequests = getConfirmedRequestsForEvents(eventIds);
         Map<Long, Long> views = getViewsForEvents(eventIds);
         Map<Long, List<CommentDto>> comments = getCommentsForEvents(eventIds);
 
 
         return events.stream().map(event -> {
-            Long confirmedR = confirmedRequests.get(event.getId());
-            Long view = views.get(event.getId());
-            return EventMapper.mapToShortDto(event, confirmedR, view,
-                    comments.getOrDefault(event.getId(), Collections.emptyList()).size());
+            Long confirmedR = confirmedRequests.getOrDefault(event.getId(), 0L);
+            Long view = views.getOrDefault(event.getId(), 0L);
+            int commentCount = comments.getOrDefault(event.getId(), Collections.emptyList()).size();
+            return EventMapper.mapToShortDto(event, confirmedR, view, commentCount);
         }).toList();
+    }
+
+    private Map<Long, Long> getConfirmedRequestsForEvents(List<Long> eventIds) {
+        if (eventIds.isEmpty()) {
+            return Map.of();
+        }
+        try {
+            Map<Long, Long> result = new HashMap<>();
+            for (Long eventId : eventIds) {
+                int count = requestFeignClient.getRequestsCountByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+                result.put(eventId, (long) count);
+            }
+            return result;
+        } catch (Exception e) {
+            log.error("Error fetching confirmed requests for events", e);
+            return Map.of();
+        }
     }
 
     private Map<Long, Long> getViewsForEvents(List<Long> eventIds) {
@@ -432,21 +454,15 @@ public class EventServiceImpl implements EventService {
 
         List<Long> eventIds = events.stream().map(Event::getId).toList();
 
-        Map<Long, Long> confirmedRequests = requestRepository
-                .countConfirmedRequestsByEvents(RequestStatus.CONFIRMED, eventIds)
-                .stream()
-                .collect(Collectors.toMap(
-                        ConfirmedRequests::getEvent,
-                        ConfirmedRequests::getCount,
-                        (count1, count2) -> count1 + count2  // ДОБАВЬТЕ ЭТО
-                ));
+        Map<Long, Long> confirmedRequests = getConfirmedRequestsForEvents(eventIds);
+
         Map<Long, Long> views = getViewsForEvents(eventIds);
 
         Map<Long, List<CommentDto>> commentsMap = getCommentsForEvents(eventIds);
 
         return events.stream().map(event -> {
-            Long confirmedR = confirmedRequests.get(event.getId());
-            Long view = views.get(event.getId());
+            Long confirmedR = confirmedRequests.getOrDefault(event.getId(), 0L);
+            Long view = views.getOrDefault(event.getId(), 0L);
             EventDto dto = EventMapper.mapToDto(event, confirmedR, view);
 
             List<CommentDto> comments = commentsMap.get(event.getId());
@@ -461,14 +477,18 @@ public class EventServiceImpl implements EventService {
             return Map.of();
         }
 
-        List<CommentDto> comments = commentRepository.findByEventIdInAndStatus(
-                eventIds, CommentStatus.PUBLISHED);
-
-        return comments.stream()
-                .collect(Collectors.groupingBy(
-                        comment -> comment.getEvent().getId(),
-                        Collectors.mapping(CommentMapper::toDto, Collectors.toList())
-                ));
+        try {
+            Map<Long, List<CommentDto>> commentsMap = new HashMap<>();
+            for (Long eventId : eventIds) {
+                List<CommentDto> comments = commentFeignClient.getCommentsByEventIdAndStatus(
+                        eventId, CommentStatus.PUBLISHED);
+                commentsMap.put(eventId, comments);
+            }
+            return commentsMap;
+        } catch (Exception e) {
+            log.error("Error fetching comments for events", e);
+            return Map.of();
+        }
     }
 
     @Override
@@ -491,15 +511,22 @@ public class EventServiceImpl implements EventService {
         log.info("Событие с id = {} успешно обновлено администратором", eventId);
 
         EventDto result = EventMapper.toEventDto(updatedEvent);
-        Long confirmedRequests = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+
+        int confirmedRequestsCount = requestFeignClient.getRequestsCountByEventIdAndStatus(
+                eventId, RequestStatus.CONFIRMED);
+        result.setConfirmedRequests((long) confirmedRequestsCount);
+
         Long views = getViews(eventId);
-        result.setConfirmedRequests(confirmedRequests);
         result.setViews(views);
 
-        List<CommentDto> comments = commentRepository.findByEventIdAndStatus(eventId, CommentStatus.PUBLISHED).stream()
-                .map(CommentMapper::toDto)
-                .toList();
-        result.setComments(comments);
+        try {
+            List<CommentDto> comments = commentFeignClient.getCommentsByEventIdAndStatus(
+                    eventId, CommentStatus.PUBLISHED);
+            result.setComments(comments);
+        } catch (Exception e) {
+            log.error("Error fetching comments for event: {}", eventId, e);
+            result.setComments(List.of());
+        }
 
         return result;
 
@@ -512,7 +539,7 @@ public class EventServiceImpl implements EventService {
         }
 
         if (users != null && !users.isEmpty()) {
-            List<Long> existingUsers = userRepository.findExistingUserIds(users);
+            List<Long> existingUsers = userFeignClient.findExistingUserIds(users);
             if (existingUsers.size() != users.size()) {
                 throw new NotFoundException("Некоторые пользователи не найдены");
             }

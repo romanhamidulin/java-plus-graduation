@@ -1,6 +1,5 @@
 package ru.practicum.feign.fallback;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import ru.practicum.dto.events.EventDto;
 import ru.practicum.exception.ServiceUnavailableException;

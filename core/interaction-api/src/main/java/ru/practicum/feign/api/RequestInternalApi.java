@@ -6,6 +6,7 @@ import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.enums.request.RequestStatus;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface RequestInternalApi {
@@ -26,4 +27,12 @@ public interface RequestInternalApi {
             @RequestParam("requesterId") long requesterId,
             @RequestParam("eventId") long eventId,
             @RequestParam("status") RequestStatus status);
+
+    @GetMapping("/by-status-and-event")
+    List<ParticipationRequestDto> findAllByStatusAndEvent_Id(
+            @RequestParam("status") RequestStatus status,
+            @RequestParam("eventId") Long eventId);
+
+    @GetMapping("/counts")
+    Map<Long, Long> getConfirmedRequestsCountsForEvents(@RequestParam("ids") List<Long> eventIds);
 }
