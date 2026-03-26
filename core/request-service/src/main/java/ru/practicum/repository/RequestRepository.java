@@ -22,7 +22,7 @@ public interface RequestRepository extends JpaRepository<Request, Long>, Queryds
     List<ConfirmedRequests> findAllByEventIdInAndStatus(@Param("ids") List<Long> ids,
                                                         @Param("status") RequestStatus status);
 
-    List<Request> findAllByStatusAndEvent_Id(RequestStatus status, Long eventId);
+    List<Request> findAllByStatusAndEventId(RequestStatus status, Long eventId);
 
     Long countByEventIdAndStatus(Long eventId, RequestStatus status);
 

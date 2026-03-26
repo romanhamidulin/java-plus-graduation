@@ -195,7 +195,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public int getRequestsCountByEventIdAndStatus(Long eventId, RequestStatus status) {
-        return requestRepository.findAllByStatusAndEvent_Id(status, eventId).size();
+        return requestRepository.findAllByStatusAndEventId(status, eventId).size();
     }
 
     @Override
@@ -233,7 +233,7 @@ public class RequestServiceImpl implements RequestService {
     public List<ParticipationRequestDto> findAllByStatusAndEventId(RequestStatus status, Long eventId) {
         log.debug("Finding all requests by status: {} and eventId: {}", status, eventId);
 
-        return requestRepository.findAllByStatusAndEvent_Id(status, eventId)
+        return requestRepository.findAllByStatusAndEventId(status, eventId)
                 .stream()
                 .map(RequestMapper::toParticipationRequestDto)
                 .collect(Collectors.toList());
