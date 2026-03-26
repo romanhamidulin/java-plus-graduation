@@ -66,7 +66,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventDto addEvent(Long userId, EventCreateDto eventCreateDto) {
+    public EventFullDto addEvent(Long userId, EventCreateDto eventCreateDto) {
         log.info("Валидация даты и времени события");
 
 
@@ -91,7 +91,7 @@ public class EventServiceImpl implements EventService {
 
         event = eventRepository.save(event);
 
-        return responseEventBuilder.buildOneEventResponseDto(event, EventDto.class);
+        return responseEventBuilder.buildOneEventResponseDto(event, EventFullDto.class);
     }
 
     @Override

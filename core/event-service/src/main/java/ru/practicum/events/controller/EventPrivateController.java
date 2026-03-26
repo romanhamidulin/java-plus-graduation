@@ -8,10 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.dto.events.EventCreateDto;
-import ru.practicum.dto.events.EventDto;
-import ru.practicum.dto.events.EventShortDto;
-import ru.practicum.dto.events.EventUpdateDto;
+import ru.practicum.dto.events.*;
 import ru.practicum.events.service.EventService;
 import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateResult;
@@ -38,8 +35,8 @@ public class EventPrivateController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EventDto addEvent(@PathVariable Long userId,
-                             @Valid @RequestBody EventCreateDto eventCreateDto) {
+    public EventFullDto addEvent(@PathVariable Long userId,
+                                 @Valid @RequestBody EventCreateDto eventCreateDto) {
         return eventService.addEvent(userId, eventCreateDto);
     }
 

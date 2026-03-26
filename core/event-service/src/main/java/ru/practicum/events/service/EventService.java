@@ -11,7 +11,7 @@ import java.util.List;
 public interface EventService {
     List<EventShortDto> getEventsByOwner(Long userId, Integer from, Integer size);
 
-    EventDto addEvent(Long userId, EventCreateDto eventCreateDto);
+    EventFullDto addEvent(Long userId, EventCreateDto eventCreateDto);
 
     List<EventShortDto> allEvents(EntityParam params, String ip);
 
