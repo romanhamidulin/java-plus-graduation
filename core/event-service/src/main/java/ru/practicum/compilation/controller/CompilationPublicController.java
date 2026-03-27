@@ -1,9 +1,13 @@
 package ru.practicum.compilation.controller;
 
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.compilation.model.GetCompilationsParam;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.compilation.service.CompilationService;
 
@@ -20,14 +24,21 @@ public class CompilationPublicController {
 
     @GetMapping
     public List<CompilationDto> getCompilations(@RequestParam(required = false) Boolean pinned,
-                                                @RequestParam(defaultValue = "0") Integer from,
-                                                @RequestParam(defaultValue = "10") Integer size) {
+                                                @Min(0) @RequestParam(defaultValue = "0") Integer from,
+                                                @Min(1) @RequestParam(defaultValue = "10") Integer size) {
         log.info("GET /compilations - получение подборки");
-        return compilationService.getCompilations(pinned, from, size);
+        Pageable page = PageRequest.of(from, size);
+        GetCompilationsParam param = GetCompilationsParam.builder()
+                .pinned(pinned)
+                .pageable(page)
+                .build();
+
+        List<CompilationDto> compilations = compilationService.getCompilations(param);
+        return compilations;
     }
 
     @GetMapping("/{compId}")
-    public CompilationDto getCompilationById(@PathVariable Long compId) {
+    public CompilationDto getCompilationById(@Min(1) @PathVariable Long compId) {
         return compilationService.getCompilationById(compId);
     }
 }

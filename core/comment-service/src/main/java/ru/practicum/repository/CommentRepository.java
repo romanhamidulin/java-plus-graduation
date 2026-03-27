@@ -13,13 +13,7 @@ import java.util.Set;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByEventId(Long eventId, Pageable pageable);
 
-    List<Comment> findByEventIdAndStatus(Long eventId, CommentStatus commentStatus);
-
-    Long countByEventIdAndStatus(Long eventId, CommentStatus commentStatus);
-
     List<Comment> findAllByStatus(CommentStatus commentStatus);
-
-    List<Comment> findByEventIdInAndStatus(List<Long> eventIds, CommentStatus commentStatus);
 
     List<Comment> findByAuthorIdInAndStatus(List<Long> usersId, CommentStatus commentStatus);
 

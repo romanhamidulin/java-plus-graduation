@@ -1,32 +1,21 @@
 package ru.practicum.compilation.mapper;
 
-import lombok.experimental.UtilityClass;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.NewCompilationDto;
 import ru.practicum.compilation.model.Compilation;
-import ru.practicum.dto.events.EventShortDto;
-import ru.practicum.events.mapper.EventMapper;
+import ru.practicum.dto.compilation.UpdateCompilationRequest;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+public interface CompilationMapper {
 
-@UtilityClass
-public class CompilationMapper {
+    @Mapping(source = "events", target = "events", ignore = true)
+    Compilation toCompilation(NewCompilationDto newCompilationDto);
 
-    public CompilationDto toDto(Compilation compilation, List<EventShortDto> eventShortDtos) {
-        CompilationDto dto = new CompilationDto();
-        dto.setId(compilation.getId());
-        dto.setTitle(compilation.getTitle());
-        dto.setPinned(compilation.getPinned() != null ? compilation.getPinned() : false);
-        dto.setEvents(eventShortDtos != null ? eventShortDtos : Collections.emptyList());
-        return dto;
-    }
+    @Mapping(source = "events", target = "events", ignore = true)
+    Compilation toCompilation(UpdateCompilationRequest updateCompilationRequest);
 
-    public Compilation toEntity(NewCompilationDto newCompilationDto) {
-        Compilation compilation = new Compilation();
-        compilation.setTitle(newCompilationDto.getTitle());
-        compilation.setPinned(newCompilationDto.getPinned() != null ? newCompilationDto.getPinned() : false);
-        return compilation;
-    }
+    CompilationDto toCompilationDto(Compilation compilation);
 }

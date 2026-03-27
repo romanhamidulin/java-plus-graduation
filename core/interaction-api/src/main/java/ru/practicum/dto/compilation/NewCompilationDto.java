@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,7 +16,7 @@ import java.util.List;
 @ToString
 public class NewCompilationDto {
     @Nullable
-    private List<Long> events;
+    private Set<Long> events = new HashSet<>();
     private Boolean pinned = false;
 
     @NotBlank

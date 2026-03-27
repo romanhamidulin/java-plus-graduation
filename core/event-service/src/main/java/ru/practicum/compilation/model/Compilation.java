@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import ru.practicum.events.model.Event;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -22,7 +21,8 @@ public class Compilation {
             joinColumns = @JoinColumn(name = "compilation_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
-    private Set<Event> events = new HashSet<>();
+    Set<Event> events;
+
     private Boolean pinned;
 
     @Column(nullable = false, length = 50)

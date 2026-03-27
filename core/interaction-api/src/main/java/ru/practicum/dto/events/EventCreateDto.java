@@ -1,12 +1,14 @@
 package ru.practicum.dto.events;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import ru.practicum.enums.event.EventState;
 
 import java.time.LocalDateTime;
 
@@ -38,6 +40,9 @@ public class EventCreateDto {
 
     private Boolean paid;
     @PositiveOrZero
-    private Integer participantLimit;
+    private Integer participantLimit = 0;
     private Boolean requestModeration = true;
+
+    @JsonIgnore
+    EventState state = EventState.PENDING;
 }

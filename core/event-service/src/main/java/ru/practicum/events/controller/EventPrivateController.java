@@ -5,13 +5,15 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.events.*;
 import ru.practicum.events.service.EventService;
-import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
-import ru.practicum.dto.request.EventRequestStatusUpdateResult;
+import ru.practicum.dto.events.EventRequestStatusUpdateRequest;
+import ru.practicum.dto.events.EventRequestStatusUpdateResult;
 import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.feign.client.RequestFeignClient;
 
@@ -27,42 +29,50 @@ public class EventPrivateController {
     private final RequestFeignClient requestFeignClient;
 
     @GetMapping
-    public List<EventShortDto> getEventsByOwner(@PathVariable Long userId,
-                                                @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                                @RequestParam(defaultValue = "10") @Positive Integer size) {
-        return eventService.getEventsByOwner(userId, from, size);
+    public ResponseEntity<List<EventShortDto>> getEventsByOwner(@PathVariable Long userId,
+                                                                @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                                                @RequestParam(defaultValue = "10") @Positive Integer size) {
+        List<EventShortDto> events = eventService.getEventsByOwner(userId, PageRequest.of(from, size));
+        return ResponseEntity.ok(events);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EventFullDto addEvent(@PathVariable Long userId,
+    public ResponseEntity<EventFullDto> addEvent(@PathVariable Long userId,
                                  @Valid @RequestBody EventCreateDto eventCreateDto) {
-        return eventService.addEvent(userId, eventCreateDto);
+        EventFullDto event = eventService.addEvent(userId, eventCreateDto);
+        return new ResponseEntity<>(event, HttpStatus.CREATED);
     }
 
     @GetMapping("/{eventId}")
-    public EventDto getEventByOwner(@PathVariable Long userId,
+    public ResponseEntity<EventFullDto> getEventByOwner(@PathVariable Long userId,
                                     @PathVariable Long eventId) {
-        return eventService.getEventByOwner(userId, eventId);
+        EventFullDto event = eventService.getEventByOwner(userId, eventId);
+        return ResponseEntity.ok(event);
+
     }
 
     @PatchMapping("/{eventId}")
-    public EventDto updateEvent(@PathVariable Long userId,
+    public ResponseEntity<EventFullDto> updateEvent(@PathVariable Long userId,
                                 @PathVariable Long eventId,
                                 @Valid @RequestBody EventUpdateDto eventUpdateDto) {
-        return eventService.updateEvent(userId, eventId, eventUpdateDto);
+        EventFullDto event = eventService.updateEvent(userId, eventId, eventUpdateDto);
+        return ResponseEntity.ok(event);
     }
 
     @GetMapping("/{eventId}/requests")
-    public List<ParticipationRequestDto> getUserEventRequests(@PathVariable Long userId,
+    public ResponseEntity<List<ParticipationRequestDto>> getUserEventRequests(@PathVariable Long userId,
                                                               @PathVariable Long eventId) {
-        return eventService.getUserEventRequests(userId, eventId);
+        List<ParticipationRequestDto> requests = eventService.getUserEventRequests(userId, eventId);
+        return ResponseEntity.ok(requests);
     }
 
     @PatchMapping("/{eventId}/requests")
-    public EventRequestStatusUpdateResult updateUserEventRequests(@PathVariable Long userId,
+    public ResponseEntity<EventRequestStatusUpdateResult> updateUserEventRequests(@PathVariable Long userId,
                                                                   @PathVariable Long eventId,
                                                                   @Valid @RequestBody EventRequestStatusUpdateRequest dto) {
-        return eventService.updateUserEventRequests(userId, eventId, dto);
+        EventRequestStatusUpdateResult result = eventService.updateUserEventRequests(userId, eventId, dto);
+        log.info("Отправлен ответ на PATCH /users/{}/events/{},requests с телом: {}", userId, eventId, result);
+        return ResponseEntity.ok(result);
     }
 }

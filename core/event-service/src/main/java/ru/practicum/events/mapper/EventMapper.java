@@ -1,120 +1,59 @@
 package ru.practicum.events.mapper;
 
-import lombok.experimental.UtilityClass;
-import ru.practicum.dto.category.CategoryDto;
-import ru.practicum.category.mapper.CategoryMapper;
-import ru.practicum.dto.events.EventCreateDto;
-import ru.practicum.dto.events.EventDto;
-import ru.practicum.dto.events.EventShortDto;
-import ru.practicum.dto.events.LocationDto;
-import ru.practicum.dto.user.UserShortDto;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.Named;
+import ru.practicum.dto.events.*;
+import ru.practicum.enums.event.AdminUpdateStateAction;
+import ru.practicum.enums.event.EventState;
+import ru.practicum.enums.event.UpdateStateAction;
 import ru.practicum.events.model.Event;
 
-@UtilityClass
-public class EventMapper {
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+public interface EventMapper {
+    @Mapping(source = "category", target = "id", ignore = true)
+    Event toEvent(EventCreateDto newEventDto);
 
-    public EventDto mapToDto(Event event, Long confirmedRequest, Long views, UserShortDto initiator) {
-        EventDto.EventDtoBuilder builder = EventDto.builder()
-                .id(event.getId())
-                .title(event.getTitle())
-                .annotation(event.getAnnotation())
-                .description(event.getDescription())
-                .confirmedRequests(confirmedRequest != null ? confirmedRequest : 0L)
-                .views(views != null ? views : 0L)
-                .paid(event.getPaid())
-                .requestModeration(event.getRequestModeration())
-                .participantLimit(event.getParticipantLimit())
-                .location(LocationDto.builder()
-                        .lat(event.getLocation().getLat())
-                        .lon(event.getLocation().getLon())
-                        .build())
-                .state(event.getState())
-                .initiator(initiator)
-                .eventDate(event.getEventDate())
-                .createdOn(event.getCreatedOn())
-                .publishedOn(event.getPublishedOn());
+    @Mapping(source = "category", target = "id", ignore = true)
+    @Mapping(source = "stateAction", target = "state", qualifiedByName = "stateFromAdminAction")
+    Event toEvent(EventAdminUpdateDto updateEventAdminRequest);
 
-        if (event.getCategory() != null) {
-            builder.category(CategoryMapper.mapToDto(event.getCategory()));
+    @Mapping(source = "category", target = "id", ignore = true)
+    @Mapping(source = "stateAction", target = "state", qualifiedByName = "stateFromUserAction")
+    Event toEvent(EventUpdateDto updateEventUserRequest);
+
+    EventShortDto toEventShortDto(Event event);
+
+    EventFullDto toEventFullDto(Event event);
+
+    UpdateEventParam toUpdateParam(EventAdminUpdateDto request);
+
+    UpdateEventParam toUpdateParam(EventUpdateDto request);
+
+    @Named("stateFromAdminAction")
+    default EventState stateFromAdminAction(AdminUpdateStateAction action) {
+        if (action == null) {
+            return null;
         }
 
-        return builder.build();
+        if (action == AdminUpdateStateAction.PUBLISH_EVENT) {
+            return EventState.PUBLISHED;
+        } else {
+            return EventState.REJECTED;
+        }
     }
 
-    public static EventShortDto mapToShortDto(Event event, Long confirmedRequest, Long views, Integer countOfComments, UserShortDto initiator) {
-        EventShortDto.EventShortDtoBuilder builder = EventShortDto.builder()
-                .id(event.getId())
-                .title(event.getTitle())
-                .annotation(event.getAnnotation())
-                .confirmedRequests(confirmedRequest != null ? confirmedRequest : 0L)
-                .views(views != null ? views : 0L)
-                .paid(event.getPaid())
-                .initiator(initiator)
-                .countOfComments(countOfComments)
-                .eventDate(event.getEventDate());
-
-        if (event.getCategory() != null) {
-            builder.category(CategoryDto.builder()
-                    .id(event.getCategory().getId())
-                    .name(event.getCategory().getName())
-                    .build());
+    @Named("stateFromUserAction")
+    default EventState stateFromUserAction(UpdateStateAction action) {
+        if (action == null) {
+            return null;
         }
 
-        return builder.build();
-    }
-
-    public Event toEvent(EventCreateDto dto) {
-        Event event = new Event();
-        event.setTitle(dto.getTitle());
-        event.setAnnotation(dto.getAnnotation());
-        event.setDescription(dto.getDescription());
-        event.setEventDate(dto.getEventDate());
-        event.setPaid(dto.getPaid() != null ? dto.getPaid() : false);
-        event.setParticipantLimit(dto.getParticipantLimit() != null ? dto.getParticipantLimit() : 0);
-        event.setRequestModeration(dto.getRequestModeration() != null ? dto.getRequestModeration() : true);
-        return event;
-    }
-
-    public EventShortDto toEventShortDto(Event event,UserShortDto initiator) {
-        EventShortDto.EventShortDtoBuilder builder = EventShortDto.builder()
-                .id(event.getId())
-                .title(event.getTitle())
-                .annotation(event.getAnnotation())
-                .confirmedRequests(0L)
-                .views(0L)
-                .eventDate(event.getEventDate())
-                .paid(event.getPaid())
-                .initiator(initiator);
-
-        if (event.getCategory() != null) {
-            builder.category(CategoryMapper.mapToDto(event.getCategory()));
+        if (action == UpdateStateAction.SEND_TO_REVIEW) {
+            return EventState.PENDING;
+        } else {
+            return EventState.CANCELED;
         }
-
-        return builder.build();
-    }
-
-    public EventDto toEventDto(Event event,UserShortDto initiator) {
-        EventDto.EventDtoBuilder builder = EventDto.builder()
-                .id(event.getId())
-                .title(event.getTitle())
-                .annotation(event.getAnnotation())
-                .description(event.getDescription())
-                .confirmedRequests(0L)
-                .views(0L)
-                .eventDate(event.getEventDate())
-                .paid(event.getPaid())
-                .requestModeration(event.getRequestModeration())
-                .participantLimit(event.getParticipantLimit())
-                .location(LocationMapper.toLocationDto(event.getLocation()))
-                .initiator(initiator)
-                .state(event.getState())
-                .publishedOn(event.getPublishedOn())
-                .createdOn(event.getCreatedOn());
-
-        if (event.getCategory() != null) {
-            builder.category(CategoryMapper.mapToDto(event.getCategory()));
-        }
-
-        return builder.build();
     }
 }

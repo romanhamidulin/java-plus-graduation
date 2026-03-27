@@ -1,4 +1,4 @@
-package ru.practicum.dto.request;
+package ru.practicum.dto.events;
 
 import lombok.*;
 import ru.practicum.enums.request.RequestStatus;

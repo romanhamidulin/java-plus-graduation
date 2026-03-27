@@ -17,4 +17,15 @@ public class UpdateCompilationRequest {
 
     @Size(min = 1, max = 50)
     private String title;
+
+    public boolean hasTitle() {
+        return title != null;
+    }
+
+    public boolean hasPinned() {
+        return pinned != null;
+    }
+
+    public boolean hasEvents() { return events != null;
+    }
 }

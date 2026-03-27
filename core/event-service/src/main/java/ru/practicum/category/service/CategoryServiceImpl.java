@@ -22,17 +22,18 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository repository;
     private final EventRepository eventRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
     public List<CategoryDto> findAll(Integer from, Integer size) {
         Pageable pageable = PageRequest.of(from / size, size);
-        return repository.findAll(pageable).stream().map(CategoryMapper::mapToDto).toList();
+        return categoryMapper.toCategoryDtoList(repository.findAll(pageable).toList());
     }
 
     @Override
     public CategoryDto findById(Long catId) {
         Category category = checkCategory(catId);
-        return CategoryMapper.mapToDto(category);
+        return categoryMapper.toCategoryDto(category);
     }
 
     @Override
@@ -41,13 +42,13 @@ public class CategoryServiceImpl implements CategoryService {
         repository.findByNameContainsIgnoreCase(dto.getName()).ifPresent(category -> {
             throw new ConflictException("Категория с таким именем уже существует");
         });
-        Category category = CategoryMapper.mapToPojo(dto);
-        return CategoryMapper.mapToDto(repository.save(category));
+        Category category = categoryMapper.toCategory(dto);
+        return categoryMapper.toCategoryDto(repository.save(category));
     }
 
     @Override
     @Transactional
-    public CategoryDto updateById(Long catId, NewCategoryDto dto) {
+    public CategoryDto updateById(Long catId, CategoryDto dto) {
         Category category = repository.findById(catId)
                 .orElseThrow(() -> new NotFoundException("Категория с id = " + catId + " не найдена"));
 
@@ -55,7 +56,7 @@ public class CategoryServiceImpl implements CategoryService {
             String newName = dto.getName().trim();
 
             if (category.getName().equals(newName)) {
-                return CategoryMapper.mapToDto(category);
+                return categoryMapper.toCategoryDto(category);
             }
 
             if (repository.existsByNameAndIdNot(newName, catId)) {
@@ -66,7 +67,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         Category updatedCategory = repository.save(category);
-        return CategoryMapper.mapToDto(updatedCategory);
+        return categoryMapper.toCategoryDto(updatedCategory);
     }
 
     @Override

@@ -22,6 +22,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Override
     public List<UserDto> getUsers(UserRequest request) {
@@ -32,7 +33,7 @@ public class UserServiceImpl implements UserService {
                 ? userRepository.findAll(pageable)
                 : userRepository.findByIdIn(request.getIds(), pageable);
 
-        return userPage.map(UserMapper::toUserDto).getContent();
+        return userPage.map(userMapper::toUserDto).getContent();
     }
 
     @Override
@@ -41,9 +42,9 @@ public class UserServiceImpl implements UserService {
         userRepository.findByEmail(newUserRequest.getEmail()).ifPresent(user -> {
             throw new ConflictException("Пользователь с таким email уже существует");
         });
-        User user = UserMapper.toNewUser(newUserRequest);
+        User user = userMapper.toUser(newUserRequest);
         User savedUser = userRepository.save(user);
-        return UserMapper.toUserDto(savedUser);
+        return userMapper.toUserDto(savedUser);
     }
 
     @Override
@@ -59,7 +60,7 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с Id " + userId + " не найден"));
-        return UserMapper.toUserDto(user);
+        return userMapper.toUserDto(user);
     }
     @Override
     public List<Long> findExistingUserIds(List<Long> userIds) {

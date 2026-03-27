@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.dto.events.EventDto;
+import ru.practicum.dto.events.EventFullDto;
 import ru.practicum.events.service.EventService;
 
 @Slf4j
@@ -19,8 +19,8 @@ public class InternalEventController {
     private final EventService eventService;
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventDto> getEventByIdWithoutHit(@PathVariable Long eventId) {
-        EventDto event = eventService.getEventByIdAnyState(eventId);
+    public ResponseEntity<EventFullDto> getEventByIdWithoutHit(@PathVariable Long eventId) {
+        EventFullDto event = eventService.getEventByIdAnyState(eventId);
         return ResponseEntity.ok(event);
     }
 }

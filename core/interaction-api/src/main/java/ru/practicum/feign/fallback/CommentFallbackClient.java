@@ -2,7 +2,6 @@ package ru.practicum.feign.fallback;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.dto.comment.CommentDto;
-import ru.practicum.enums.comment.CommentStatus;
 import ru.practicum.exception.ServiceUnavailableException;
 import ru.practicum.feign.api.CommentInternalApi;
 
@@ -21,16 +20,6 @@ public class CommentFallbackClient implements CommentInternalApi {
 
     @Override
     public List<CommentDto> getCommentsByEventId(Long eventId) {
-        throw new ServiceUnavailableException(SERVICE_NAME);
-    }
-
-    @Override
-    public List<CommentDto> getCommentsByEventIdAndStatus(Long eventId, CommentStatus status) {
-        throw new ServiceUnavailableException(SERVICE_NAME);
-    }
-
-    @Override
-    public long getCommentsCountByEventIdAndStatus(Long eventId, CommentStatus status) {
         throw new ServiceUnavailableException(SERVICE_NAME);
     }
 }

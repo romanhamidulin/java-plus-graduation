@@ -39,4 +39,12 @@ public class EventUpdateDto {
     private Boolean requestModeration;
 
     private UpdateStateAction stateAction;
+
+    public boolean hasEventDate() {
+        return eventDate != null;
+    }
+
+    public boolean hasStateAction() {
+        return stateAction != null;
+    }
 }

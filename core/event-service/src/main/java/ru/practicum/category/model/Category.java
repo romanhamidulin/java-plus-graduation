@@ -2,6 +2,9 @@ package ru.practicum.category.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.practicum.events.model.Event;
+
+import java.util.Set;
 
 @Entity
 @Getter
@@ -17,4 +20,7 @@ public class Category {
 
     @Column(name = "category_name", nullable = false, unique = true, length = 50)
     private String name;
+
+    @OneToMany(mappedBy = "category")
+    Set<Event> events;
 }

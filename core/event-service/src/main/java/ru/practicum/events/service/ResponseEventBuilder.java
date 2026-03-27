@@ -4,21 +4,21 @@ import ru.practicum.client.StatsClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.practicum.dto.events.EventDto;
 import ru.practicum.dto.events.EventFullDto;
 import ru.practicum.dto.events.ResponseEvent;
-import ru.practicum.dto.request.ConfirmedRequests;
-import ru.practicum.stats.dto.ViewStats;
-import ru.practicum.dto.comment.CommentDto;
+import ru.practicum.dto.request.ConfirmedRequestsDto;
 import ru.practicum.dto.events.EventShortDto;
 import ru.practicum.dto.user.UserDto;
+import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.dto.user.UserShortDto;
 import ru.practicum.enums.request.RequestStatus;
 import ru.practicum.events.mapper.EventMapper;
 import ru.practicum.events.model.Event;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.feign.client.CommentFeignClient;
 import ru.practicum.feign.client.RequestFeignClient;
 import ru.practicum.feign.client.UserFeignClient;
+import ru.practicum.stats.dto.ViewStats;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -28,6 +28,7 @@ import java.util.*;
 @Component
 @RequiredArgsConstructor
 public class ResponseEventBuilder {
+    private final EventMapper eventMapper;
     private final RequestFeignClient requestFeignClient;
     private final CommentFeignClient commentFeignClient;
     private final UserFeignClient userFeignClient;
@@ -35,16 +36,16 @@ public class ResponseEventBuilder {
 
     public <T extends ResponseEvent> T buildOneEventResponseDto(Event event, Class<T> type) {
         T dto;
-        UserDto user = userFeignClient.getUserById(event.getInitiatorId()).orElseThrow();
+        UserDto user = userFeignClient.getUserById(event.getInitiatorId()).orElseThrow(() -> new NotFoundException(String.format("Пользователь с ID %s не найден", event.getInitiatorId())));
         UserShortDto initiator = new UserShortDto();
         initiator.setId(user.getId());
         initiator.setName(user.getName());
         if (type == EventFullDto.class) {
-            EventDto dtoTemp = EventMapper.toEventDto(event,initiator);
+            EventFullDto dtoTemp = eventMapper.toEventFullDto(event);
             dtoTemp.setInitiator(initiator);
             dto = type.cast(dtoTemp);
         } else {
-            EventShortDto dtoTemp = EventMapper.toEventShortDto(event,initiator);
+            EventShortDto dtoTemp = eventMapper.toEventShortDto(event);
             dtoTemp.setInitiator(initiator);
             dto = type.cast(dtoTemp);
         }
@@ -62,23 +63,20 @@ public class ResponseEventBuilder {
         Map<Long, T> dtoById = new HashMap<>();
 
         for (Event event : events) {
-            UserDto initiator = userFeignClient.getUserById(event.getInitiatorId()).orElseThrow();
-            UserShortDto initiators = new UserShortDto();
-            initiator.setId(initiator.getId());
-            initiator.setName(initiator.getName());
+            UserDto initiator = userFeignClient.getUserById(event.getInitiatorId()).orElseThrow(() -> new NotFoundException(String.format("Пользователь с ID %s не найден", event.getInitiatorId())));
             if (type == EventFullDto.class) {
-                EventDto dtoTemp = EventMapper.toEventDto(event,initiators);
+                EventFullDto dtoTemp = eventMapper.toEventFullDto(event);
                 dtoTemp.setInitiator(new UserShortDto(initiator.getId(), initiator.getName()));
                 dtoById.put(event.getId(), type.cast(dtoTemp));
             } else {
-                EventShortDto dtoTemp = EventMapper.toEventShortDto(event,initiators);
+                EventShortDto dtoTemp = eventMapper.toEventShortDto(event);
                 dtoTemp.setInitiator(new UserShortDto(initiator.getId(), initiator.getName()));
                 dtoById.put(event.getId(), type.cast(dtoTemp));
             }
         }
 
         getManyEventsConfirmedRequests(dtoById.keySet()).forEach(req ->
-                dtoById.get(req.getEvent()).setConfirmedRequests((int) req.getCount()));
+                dtoById.get(req.eventId()).setConfirmedRequests(req.countRequests()));
 
 
         getManyEventsViews(dtoById.keySet()).forEach(stats -> {
@@ -104,7 +102,7 @@ public class ResponseEventBuilder {
     }
 
     private long getOneEventViews(LocalDateTime created, long eventId) {
-        List<ViewStats> viewStats = statsClient.getStats(created.minusMinutes(1), LocalDateTime.now().plusMinutes(1), List.of("/events/" + eventId), true).getBody();
+        List<ViewStats> viewStats = statsClient.getStats(created.minusMinutes(1), LocalDateTime.now().plusMinutes(1), List.of("/events/" + eventId), true);
         return viewStats == null || viewStats.isEmpty() ? 0 : viewStats.getFirst().getHits();
     }
 
@@ -113,8 +111,8 @@ public class ResponseEventBuilder {
         return comments == null ? new ArrayList<>() : comments;
     }
 
-    private List<ConfirmedRequests> getManyEventsConfirmedRequests(Collection<Long> eventIds) {
-        List<ConfirmedRequests> requests = requestFeignClient.getConfirmedRequestsByEventId(eventIds.stream().toList());
+    private List<ConfirmedRequestsDto> getManyEventsConfirmedRequests(Collection<Long> eventIds) {
+        List<ConfirmedRequestsDto> requests = requestFeignClient.getConfirmedRequestsByEventId(eventIds);
         return requests == null ? new ArrayList<>() : requests;
     }
 
@@ -123,7 +121,7 @@ public class ResponseEventBuilder {
                 .map(id -> "/events/" + id)
                 .toList();
 
-        return statsClient.getStats(LocalDateTime.of(1970, 1, 1, 0, 0), LocalDateTime.now().plusMinutes(1), uris, true).getBody();
+        return statsClient.getStats(LocalDateTime.of(1970, 1, 1, 0, 0), LocalDateTime.now().plusMinutes(1), uris, true);
     }
 
     private List<CommentDto> getManyEventsComments(Set<Long> eventsIds) {

@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.comment.CommentDto;
-import ru.practicum.enums.comment.CommentStatus;
 import ru.practicum.feign.api.CommentInternalApi;
-import ru.practicum.mapper.CommentMapper;
 import ru.practicum.repository.CommentRepository;
 import ru.practicum.service.CommentService;
 
@@ -38,22 +36,4 @@ public class InternalCommentController implements CommentInternalApi {
         return comments;
     }
 
-    @GetMapping("/event/{eventId}")
-    public List<CommentDto> getCommentsByEventIdAndStatus(
-            @PathVariable("eventId") Long eventId,
-            @RequestParam("status") CommentStatus status) {
-
-        return commentRepository.findByEventIdAndStatus(eventId, status)
-                .stream()
-                .map(CommentMapper::toDto)
-                .toList();
-    }
-
-    @GetMapping("/event/{eventId}/count")
-    public long getCommentsCountByEventIdAndStatus(
-            @PathVariable("eventId") Long eventId,
-            @RequestParam("status") CommentStatus status) {
-
-        return commentRepository.countByEventIdAndStatus(eventId, status);
-    }
 }

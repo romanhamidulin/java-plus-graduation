@@ -18,15 +18,16 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "event_id")
-    private Long eventId;
-
     @JoinColumn(name = "requester_id")
     private Long requesterId;
 
+    @JoinColumn(name = "event_id")
+    private Long eventId;
+
+    @Column(nullable = false, length = 120)
+    @Enumerated(EnumType.ORDINAL)
+    private RequestStatus status;
+
     @Column(name = "created_at")
     private LocalDateTime createdOn;
-
-    @Enumerated(EnumType.STRING)
-    private RequestStatus status;
 }

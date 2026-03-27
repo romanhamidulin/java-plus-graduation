@@ -3,17 +3,14 @@ package ru.practicum.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.dto.request.ConfirmedRequests;
+import ru.practicum.dto.request.ConfirmedRequestsDto;
 import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.enums.request.RequestStatus;
-import ru.practicum.exception.NotFoundException;
 import ru.practicum.feign.api.RequestInternalApi;
 import ru.practicum.service.RequestService;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -39,7 +36,7 @@ public class InternalRequestController implements RequestInternalApi {
 
     @Override
     @GetMapping("/confirmed")
-    public List<ConfirmedRequests> getConfirmedRequestsByEventId(@RequestParam(name = "ids") List<Long> eventsIds) {
+    public List<ConfirmedRequestsDto> getConfirmedRequestsByEventId(@RequestParam(name = "ids") Collection<Long> eventsIds) {
         log.debug("Getting confirmed requests for events: {}", eventsIds);
         return requestService.getConfirmedRequestsByEventId(eventsIds);
     }
@@ -51,34 +48,4 @@ public class InternalRequestController implements RequestInternalApi {
         return requestService.changeRequestStatus(requestId, status);
     }
 
-    @Override
-    @GetMapping("/check")
-    public Optional<ParticipationRequestDto> findByRequesterIdAndEventIdAndStatus(
-            @RequestParam("requesterId") long requesterId,
-            @RequestParam("eventId") long eventId,
-            @RequestParam("status") RequestStatus status) {
-
-        log.debug("Finding request by requesterId: {}, eventId: {}, status: {}", requesterId, eventId, status);
-
-        return requestService.findByRequesterIdAndEventIdAndStatus(requesterId, eventId, status);
-    }
-
-    @Override
-    @GetMapping("/by-status-and-event")
-    public List<ParticipationRequestDto> findAllByStatusAndEvent_Id(
-            @RequestParam("status") RequestStatus status,
-            @RequestParam("eventId") Long eventId) {
-
-        log.debug("Finding all requests by status: {} and eventId: {}", status, eventId);
-
-        return requestService.findAllByStatusAndEventId(status, eventId);
-    }
-
-    @Override
-    @GetMapping("/counts")
-    public Map<Long, Long> getConfirmedRequestsCountsForEvents(@RequestParam("ids") List<Long> eventIds) {
-        log.debug("Getting confirmed requests counts for events: {}", eventIds);
-
-        return requestService.getConfirmedRequestsCountsForEvents(eventIds);
-    }
 }
