@@ -19,7 +19,7 @@ public interface EventMapper {
     @Mapping(source = "stateAction", target = "state", qualifiedByName = "stateFromAdminAction")
     Event toEvent(EventAdminUpdateDto updateEventAdminRequest);
 
-    @Mapping(source = "category", target = "id", ignore = true)
+    @Mapping(source = "category", target = "category.id", ignore = true)
     @Mapping(source = "stateAction", target = "state", qualifiedByName = "stateFromUserAction")
     Event toEvent(EventUpdateDto updateEventUserRequest);
 
