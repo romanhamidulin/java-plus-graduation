@@ -6,8 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
-@ConfigurationPropertiesScan
-@EnableFeignClients(basePackages = {"ru.practicum.client", "ru.practicum.feign"})
+@EnableFeignClients
 public class CommentService {
     public static void main(String[] args) {
         SpringApplication.run(CommentService.class, args);
