@@ -13,7 +13,7 @@ public class UserFallbackClient implements UserInternalApi {
     private static final String SERVICE_NAME = "user-service";
 
     @Override
-    public Optional<UserDto> getUserById(Long userId) {
+    public UserDto getUserById(Long userId) {
         throw new ServiceUnavailableException(SERVICE_NAME);
     }
 }

@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface UserInternalApi {
 
     @GetMapping("/{userId}")
-    Optional<UserDto> getUserById(@PathVariable Long userId);
+    UserDto getUserById(@PathVariable Long userId);
 }

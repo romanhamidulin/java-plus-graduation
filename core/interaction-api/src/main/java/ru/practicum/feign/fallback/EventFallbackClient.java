@@ -14,7 +14,7 @@ public class EventFallbackClient implements EventInternalApi {
     private static final String SERVICE_NAME = "event-service";
 
     @Override
-    public Optional<ResponseEntity<EventFullDto>> getEventById(Long eventId) {
+    public ResponseEntity<EventFullDto> getEventById(Long eventId) {
         throw new ServiceUnavailableException(SERVICE_NAME);
     }
 }

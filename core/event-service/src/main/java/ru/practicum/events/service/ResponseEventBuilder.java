@@ -36,7 +36,7 @@ public class ResponseEventBuilder {
 
     public <T extends ResponseEvent> T buildOneEventResponseDto(Event event, Class<T> type) {
         T dto;
-        UserDto user = userFeignClient.getUserById(event.getInitiatorId()).orElseThrow(() -> new NotFoundException(String.format("Пользователь с ID %s не найден", event.getInitiatorId())));
+        UserDto user = userFeignClient.getUserById(event.getInitiatorId());
         UserShortDto initiator = new UserShortDto();
         initiator.setId(user.getId());
         initiator.setName(user.getName());
@@ -63,7 +63,7 @@ public class ResponseEventBuilder {
         Map<Long, T> dtoById = new HashMap<>();
 
         for (Event event : events) {
-            UserDto initiator = userFeignClient.getUserById(event.getInitiatorId()).orElseThrow(() -> new NotFoundException(String.format("Пользователь с ID %s не найден", event.getInitiatorId())));
+            UserDto initiator = userFeignClient.getUserById(event.getInitiatorId());
             if (type == EventFullDto.class) {
                 EventFullDto dtoTemp = eventMapper.toEventFullDto(event);
                 dtoTemp.setInitiator(new UserShortDto(initiator.getId(), initiator.getName()));

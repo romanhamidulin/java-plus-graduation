@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface EventInternalApi {
 
     @GetMapping("/{eventId}")
-    Optional<ResponseEntity<EventFullDto>> getEventById(@PathVariable Long eventId);
+    ResponseEntity<EventFullDto> getEventById(@PathVariable Long eventId);
 }

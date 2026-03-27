@@ -40,10 +40,8 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public CommentDto createComment(long authorId, long eventId, NewCommentDto newCommentDto) {
-        UserDto author = userFeignClient.getUserById(authorId)
-                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с ID %s не найден", authorId)));
-        EventFullDto event = eventFeignClient.getEventById(eventId)
-                .orElseThrow(() -> new NotFoundException(String.format("Событие с ID %s не найдено", eventId))).getBody();
+        UserDto author = userFeignClient.getUserById(authorId);
+        EventFullDto event = eventFeignClient.getEventById(eventId).getBody();
         if (authorId == event.getInitiator().getId()) {
             throw new ConflictException("Инициатор мероприятия не может оставлять комментарии к нему");
         }

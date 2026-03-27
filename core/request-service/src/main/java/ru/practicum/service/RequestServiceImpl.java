@@ -38,9 +38,9 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
 
-        EventFullDto event = eventFeignClient.getEventById(eventId).orElseThrow(() -> new NotFoundException(String.format("Событие с ID %s не найдено", eventId))).getBody();
+        EventFullDto event = eventFeignClient.getEventById(eventId).getBody();
 
-        UserDto user = userFeignClient.getUserById(userId).orElseThrow(() -> new NotFoundException(String.format("Пользователь с ID %s не найден", userId)));
+        UserDto user = userFeignClient.getUserById(userId);
 
         if (requestRepository.existsByEventIdAndRequesterId(eventId, userId)) {
             throw new DuplicateDataException("Запрос на такое событие уже есть");
@@ -80,7 +80,7 @@ public class RequestServiceImpl implements RequestService {
         Request request = requestRepository.findById(requestId).orElseThrow(() ->
                 new NotFoundException("Запрос не найден"));
 
-        userFeignClient.getUserById(userId).orElseThrow(() -> new NotFoundException(String.format("Пользователь с ID %s не найден", userId)));
+        userFeignClient.getUserById(userId);
 
         if (!request.getStatus().equals(RequestStatus.PENDING)) {
             throw new ConflictException("Нельзя отменить заявку, т.к. ее статус не PENDING");

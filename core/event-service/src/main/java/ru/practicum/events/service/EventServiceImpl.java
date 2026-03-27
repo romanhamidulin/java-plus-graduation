@@ -69,7 +69,7 @@ public class EventServiceImpl implements EventService {
                 () -> new NotFoundException("Категория не найдена"));
         event.setCategory(category);
 
-        UserDto initiator = userFeignClient.getUserById(userId).orElseThrow(() -> new NotFoundException(String.format("Пользователь с ID %s не найден", userId)));
+        UserDto initiator = userFeignClient.getUserById(userId);
         event.setInitiatorId(userId);
 
         Location location = getOrSaveLocation(eventCreateDto.getLocation());
