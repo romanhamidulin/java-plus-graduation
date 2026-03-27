@@ -12,10 +12,10 @@ import ru.practicum.events.model.Event;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface EventMapper {
-    @Mapping(source = "category", target = "id", ignore = true)
+    @Mapping(source = "category", target = "category.id", ignore = true)
     Event toEvent(EventCreateDto newEventDto);
 
-    @Mapping(source = "category", target = "id", ignore = true)
+    @Mapping(source = "category", target = "category.id", ignore = true)
     @Mapping(source = "stateAction", target = "state", qualifiedByName = "stateFromAdminAction")
     Event toEvent(EventAdminUpdateDto updateEventAdminRequest);
 
