@@ -6,9 +6,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.compilation.dto.CompilationDto;
-import ru.practicum.compilation.dto.NewCompilationDto;
-import ru.practicum.compilation.dto.UpdateCompilationRequest;
+import ru.practicum.dto.compilation.CompilationDto;
+import ru.practicum.dto.compilation.NewCompilationDto;
+import ru.practicum.dto.compilation.UpdateCompilationRequest;
 import ru.practicum.compilation.mapper.CompilationMapper;
 import ru.practicum.compilation.model.Compilation;
 import ru.practicum.compilation.repository.CompilationRepository;
@@ -29,6 +29,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
+    private final CompilationMapper compilationMapper;
 
     @Override
     public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
@@ -43,7 +44,7 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
         return compilations.stream()
-                .map(CompilationMapper::toDto)
+                .map(compilationMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -52,7 +53,7 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Подборка с id = " + compId + " не найдена"));
 
-        return CompilationMapper.toDto(compilation);
+        return compilationMapper.toDto(compilation);
     }
 
     @Override
@@ -61,7 +62,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (compilationRepository.existsByTitle(newCompilationDto.getTitle())) {
             throw new ConflictException("Подборка с наименованием " + newCompilationDto.getTitle() + " уже существует");
         }
-        Compilation compilation = CompilationMapper.toEntity(newCompilationDto);
+        Compilation compilation = compilationMapper.toEntity(newCompilationDto);
 
         if (newCompilationDto.getEvents() != null && !newCompilationDto.getEvents().isEmpty()) {
             Set<Event> events = new HashSet<>(eventRepository.findAllById(newCompilationDto.getEvents()));
@@ -69,7 +70,7 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
         Compilation savedCompilation = compilationRepository.save(compilation);
-        return CompilationMapper.toDto(savedCompilation);
+        return compilationMapper.toDto(savedCompilation);
     }
 
     @Override
@@ -113,6 +114,6 @@ public class CompilationServiceImpl implements CompilationService {
             }
         }
 
-        return CompilationMapper.toDto(compilation);
+        return compilationMapper.toDto(compilation);
     }
 }

@@ -1,6 +1,7 @@
 package ru.practicum.dto.comment;
 
 import lombok.*;
+import ru.practicum.enums.AdminUpdateCommentStatusAction;
 
 @AllArgsConstructor
 @NoArgsConstructor

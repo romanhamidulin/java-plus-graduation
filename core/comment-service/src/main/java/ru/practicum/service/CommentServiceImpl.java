@@ -1,25 +1,24 @@
 package ru.practicum.service;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.comment.dto.AdminUpdateCommentStatusDto;
-import ru.practicum.comment.dto.CommentDto;
-import ru.practicum.comment.dto.NewCommentDto;
-import ru.practicum.comment.mapper.CommentMapper;
-import ru.practicum.comment.model.AdminUpdateCommentStatusAction;
-import ru.practicum.comment.model.Comment;
-import ru.practicum.comment.model.CommentStatus;
-import ru.practicum.comment.repository.CommentRepository;
-import ru.practicum.events.model.Event;
-import ru.practicum.events.model.EventState;
-import ru.practicum.events.repository.EventRepository;
+import ru.practicum.client.EventClient;
+import ru.practicum.client.UserClient;
+import ru.practicum.dto.comment.AdminUpdateCommentStatusDto;
+import ru.practicum.dto.comment.CommentDto;
+import ru.practicum.dto.comment.NewCommentDto;
+import ru.practicum.dto.event.EventDto;
+import ru.practicum.enums.EventState;
+import ru.practicum.enums.RequestStatus;
+import ru.practicum.mapper.CommentMapper;
+import ru.practicum.enums.AdminUpdateCommentStatusAction;
+import ru.practicum.model.Comment;
+import ru.practicum.enums.CommentStatus;
+import ru.practicum.repository.CommentRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.request.model.RequestStatus;
-import ru.practicum.request.repository.RequestRepository;
-import ru.practicum.user.model.User;
-import ru.practicum.user.repository.UserRepository;
 
 import java.util.List;
 
@@ -28,29 +27,29 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
-    private final EventRepository eventRepository;
-    private final RequestRepository requestRepository;
+    private final EventClient eventClient;
+    private final UserClient userClient;
+    private final CommentMapper commentMapper;
 
     @Transactional
     @Override
     public CommentDto createComment(long authorId, long eventId, NewCommentDto newCommentDto) {
-        User author = userRepository.findById(authorId)
-                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с ID %s не найден", authorId)));
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException(String.format("Событие с ID %s не найдено", eventId)));
+        checkUserExists(authorId);
+
+        EventDto event = eventClient.getEvent(eventId);
+
         if (authorId == event.getInitiator().getId()) {
             throw new ConflictException("Инициатор мероприятия не может оставлять комментарии к нему");
         }
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Мероприятие должно быть опубликовано");
         }
-        if (requestRepository.findByRequesterIdAndEventIdAndStatus(authorId, eventId, RequestStatus.CONFIRMED).isEmpty()) {
-            throw new ConflictException("Комментарии может оставлять только подтвержденный участник мероприятия");
-        }
-        Comment comment = CommentMapper.toComment(newCommentDto, author, event);
+        //if (requestRepository.findByRequesterIdAndEventIdAndStatus(authorId, eventId, RequestStatus.CONFIRMED).isEmpty()) {
+        //    throw new ConflictException("Комментарии может оставлять только подтвержденный участник мероприятия");
+        //}
+        Comment comment = commentMapper.toComment(newCommentDto, authorId, eventId);
         commentRepository.save(comment);
-        return CommentMapper.toDto(comment);
+        return commentMapper.toDto(comment);
     }
 
     @Transactional
@@ -58,14 +57,18 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto updateComment(long authorId, long commentId, NewCommentDto updateCommentDto) {
         Comment commentToUpdate = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(String.format("Комментарий ID %s не найден", commentId)));
-        if (authorId != commentToUpdate.getAuthor().getId()) {
+        if (authorId != commentToUpdate.getUserId()) {
             throw new ConflictException("Изменить комментарий может только его автор");
         }
+        if (commentToUpdate.getStatus() != CommentStatus.PENDING) {
+            throw new ConflictException("Можно редактировать только комментарии в статусе PENDING");
+        }
+
         commentToUpdate.setText(updateCommentDto.getText());
         commentToUpdate.setStatus(CommentStatus.PENDING);
 
         commentRepository.save(commentToUpdate);
-        return CommentMapper.toDto(commentToUpdate);
+        return commentMapper.toDto(commentToUpdate);
     }
 
     @Transactional
@@ -73,7 +76,7 @@ public class CommentServiceImpl implements CommentService {
     public void deleteComment(long authorId, long commentId) {
         Comment commentToDelete = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(String.format("Комментарий ID %s не найден", commentId)));
-        if (authorId != commentToDelete.getAuthor().getId()) {
+        if (authorId != commentToDelete.getUserId()) {
             throw new ConflictException("Удалить комментарий может только его автор");
         }
         commentRepository.delete(commentToDelete);
@@ -102,20 +105,28 @@ public class CommentServiceImpl implements CommentService {
             commentToUpdateStatus.setStatus(CommentStatus.REJECTED);
         }
         commentRepository.save(commentToUpdateStatus);
-        return CommentMapper.toDto(commentToUpdateStatus);
+        return commentMapper.toDto(commentToUpdateStatus);
     }
 
     @Override
     public List<CommentDto> adminPendigCommentList(List<Long> usersId) {
         if (usersId != null && !usersId.isEmpty()) {
-            return commentRepository.findByAuthor_IdInAndStatus(usersId, CommentStatus.PENDING)
+            return commentRepository.findByUserIdInAndStatus(usersId, CommentStatus.PENDING)
                     .stream()
-                    .map(CommentMapper::toDto)
+                    .map(commentMapper::toDto)
                     .toList();
         }
         return commentRepository.findAllByStatus(CommentStatus.PENDING)
                 .stream()
-                .map(CommentMapper::toDto)
+                .map(commentMapper::toDto)
                 .toList();
+    }
+
+    private void checkUserExists(Long userId) {
+        try {
+            userClient.getUser(userId);
+        } catch (FeignException.NotFound e) {
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
     }
 }

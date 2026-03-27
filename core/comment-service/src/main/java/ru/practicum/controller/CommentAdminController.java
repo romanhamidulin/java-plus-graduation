@@ -3,9 +3,9 @@ package ru.practicum.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.comment.dto.AdminUpdateCommentStatusDto;
-import ru.practicum.comment.dto.CommentDto;
-import ru.practicum.comment.service.CommentService;
+import ru.practicum.dto.comment.AdminUpdateCommentStatusDto;
+import ru.practicum.dto.comment.CommentDto;
+import ru.practicum.service.CommentService;
 
 import java.util.List;
 

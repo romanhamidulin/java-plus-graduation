@@ -1,8 +1,8 @@
 package ru.practicum.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.practicum.comment.model.Comment;
-import ru.practicum.comment.model.CommentStatus;
+import ru.practicum.model.Comment;
+import ru.practicum.enums.CommentStatus;
 
 import java.util.List;
 
@@ -14,5 +14,5 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     List<Comment> findByEventIdInAndStatus(List<Long> eventIds, CommentStatus commentStatus);
 
-    List<Comment> findByAuthor_IdInAndStatus(List<Long> usersId, CommentStatus commentStatus);
+    List<Comment> findByUserIdInAndStatus(List<Long> usersId, CommentStatus commentStatus);
 }

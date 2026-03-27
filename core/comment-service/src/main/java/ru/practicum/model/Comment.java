@@ -2,8 +2,7 @@ package ru.practicum.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ru.practicum.events.model.Event;
-import ru.practicum.user.model.User;
+import ru.practicum.enums.CommentStatus;
 
 import java.time.LocalDateTime;
 
@@ -22,15 +21,11 @@ public class Comment {
     @Column(length = 1000)
     private String text;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id")
-    @ToString.Exclude
-    private Event event;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id")
-    @ToString.Exclude
-    private User author;
+    @Column(name = "event_id", nullable = false)
+    private Long eventId;
 
     private LocalDateTime created = LocalDateTime.now();
 

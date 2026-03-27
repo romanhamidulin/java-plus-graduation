@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.compilation.model.Compilation;
-import ru.practicum.events.model.EventState;
+import ru.practicum.enums.EventState;
 
 import java.util.List;
 import java.util.Optional;

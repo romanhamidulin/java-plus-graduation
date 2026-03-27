@@ -2,10 +2,10 @@ package ru.practicum.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import ru.practicum.category.dto.CategoryDto;
-import ru.practicum.comment.dto.CommentDto;
-import ru.practicum.events.model.EventState;
-import ru.practicum.user.dto.UserShortDto;
+import ru.practicum.dto.category.CategoryDto;
+import ru.practicum.dto.comment.CommentDto;
+import ru.practicum.enums.EventState;
+import ru.practicum.dto.user.UserShortDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
