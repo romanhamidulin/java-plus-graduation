@@ -5,4 +5,6 @@ CREATE TABLE IF NOT EXISTS comments (
     text VARCHAR(1000) NOT NULL,
     created TIMESTAMP WITHOUT TIME ZONE,
     status VARCHAR(20) NOT NULL
+    CONSTRAINT text_len CHECK (LENGTH(text) >= 1 AND LENGTH(text) <= 5000),
+    CONSTRAINT created_not_null CHECK (created <> NULL)
 );
