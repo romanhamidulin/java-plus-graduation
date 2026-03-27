@@ -1,6 +1,7 @@
 package ru.practicum.events.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +31,8 @@ public class EventPrivateController {
 
     @GetMapping
     public ResponseEntity<List<EventShortDto>> getEventsByOwner(@PathVariable Long userId,
-                                                                @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                                                @RequestParam(defaultValue = "10") @Positive Integer size) {
+                                                                @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                                                @RequestParam(defaultValue = "10") @Min(1) Integer size) {
         List<EventShortDto> events = eventService.getEventsByOwner(userId, PageRequest.of(from, size));
         return ResponseEntity.ok(events);
     }

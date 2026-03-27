@@ -1,6 +1,7 @@
 package ru.practicum.events.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -34,8 +35,8 @@ public class EventAdminController {
                                         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart, // ← ВАЖНО!
                                     @RequestParam(required = false)
                                         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-                                    @RequestParam(defaultValue = "0") Integer from,
-                                    @RequestParam(defaultValue = "10") Integer size) {
+                                    @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                    @RequestParam(defaultValue = "10") @Min(1) Integer size) {
 
         GetEventAdminParam param = GetEventAdminParam.builder()
                 .users(users)

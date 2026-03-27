@@ -31,8 +31,8 @@ public class EventPublicController {
     @GetMapping
     public ResponseEntity<List<EventShortDto>> allEvents(@RequestParam(required = false) String text,
                                                          @RequestParam(defaultValue = "views") String sort,
-                                                         @Min(0) @RequestParam(defaultValue = "0") Integer from,
-                                                         @Positive @RequestParam(defaultValue = "10") Integer size,
+                                                         @Min(0) @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                                         @Positive @RequestParam(defaultValue = "10") @Min(1) Integer size,
                                                          @RequestParam(required = false) List<Long> categories,
                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
