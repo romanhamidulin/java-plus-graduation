@@ -3,6 +3,6 @@ CREATE TABLE IF NOT EXISTS requests (
     event_id BIGINT NOT NULL,
     requester_id BIGINT NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    status VARCHAR(20) NOT NULL
+    status VARCHAR(20) NOT NULL,
     CONSTRAINT created_at_not_null CHECK (created_at <> NULL)
 );
