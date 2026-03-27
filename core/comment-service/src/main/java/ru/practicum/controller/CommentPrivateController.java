@@ -1,6 +1,7 @@
 package ru.practicum.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -16,22 +17,22 @@ public class CommentPrivateController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CommentDto createComment(@PathVariable("userId") long userId,
-                                    @RequestParam long eventId,
+    public CommentDto createComment(@PathVariable("userId") @Positive Long userId,
+                                    @RequestParam @Positive Long eventId,
                                     @Valid @RequestBody NewCommentDto newCommentDto) {
         return commentService.createComment(userId, eventId, newCommentDto);
     }
 
     @PatchMapping("/{commentId}")
-    public CommentDto updateComment(@PathVariable("userId") long userId,
-                                    @PathVariable("commentId") long commentId,
+    public CommentDto updateComment(@PathVariable("userId") @Positive Long userId,
+                                    @PathVariable("commentId") @Positive Long commentId,
                                     @Valid @RequestBody NewCommentDto updateCommentDto) {
         return commentService.updateComment(userId, commentId, updateCommentDto);
     }
 
     @DeleteMapping("/{commentId}")
-    public void deleteComment(@PathVariable("userId") long userId,
-                              @PathVariable("commentId") long commentId) {
+    public void deleteComment(@PathVariable("userId") @Positive Long userId,
+                              @PathVariable("commentId") @Positive Long commentId) {
         commentService.deleteComment(userId, commentId);
     }
 }
