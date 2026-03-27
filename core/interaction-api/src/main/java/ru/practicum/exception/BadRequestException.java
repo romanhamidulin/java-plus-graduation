@@ -15,9 +15,9 @@ public class BadRequestException extends RuntimeException {
     public BadRequestException(String message) {
         super(message);
         error = new ApiError(
-                HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                "Неправильно создан запрос",
                 message,
+                "Incorrectly made request.",
+                HttpStatus.BAD_REQUEST,
                 LocalDateTime.now());
     }
 }

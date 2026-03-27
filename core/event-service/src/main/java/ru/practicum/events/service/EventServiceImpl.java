@@ -82,7 +82,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto getEventByOwner(Long userId, Long eventId) {
         if (eventId == null || userId == null) {
-            throw new ValidationException("Id должен быть указан");
+            throw new BadRequestException("Id должен быть указан");
         }
 
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
