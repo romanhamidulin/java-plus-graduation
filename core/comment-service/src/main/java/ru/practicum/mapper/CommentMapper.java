@@ -12,6 +12,7 @@ public interface CommentMapper {
     Comment toComment(NewCommentDto commentDto);
 
     @Mapping(target = "eventId", expression = "java(comment.getEventId())")
+    @Mapping(target = "status", expression = "java(comment.getStatus().name())")
     CommentDto toCommentDto(Comment comment);
 
 }
