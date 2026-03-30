@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import ru.practicum.constants.DateTimePattern;
-import ru.practicum.enums.AdminUpdateCommentStatusAction;
 import ru.practicum.enums.AdminUpdateStateAction;
 
 import java.time.LocalDateTime;

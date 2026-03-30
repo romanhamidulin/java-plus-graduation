@@ -4,7 +4,6 @@ import org.springframework.data.domain.Pageable;
 import ru.practicum.dto.event.*;
 import ru.practicum.events.model.Event;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventService {

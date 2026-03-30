@@ -1,6 +1,5 @@
 package ru.practicum.mapper;
 
-import lombok.experimental.UtilityClass;
 import org.mapstruct.Mapper;
 import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.model.Request;
