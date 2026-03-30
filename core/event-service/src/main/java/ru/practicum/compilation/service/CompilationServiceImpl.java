@@ -17,6 +17,7 @@ import ru.practicum.events.repository.EventRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,9 +66,12 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationMapper.toEntity(newCompilationDto);
 
         if (newCompilationDto.getEvents() != null && !newCompilationDto.getEvents().isEmpty()) {
-            Set<Event> events = new HashSet<>(eventRepository.findAllById(newCompilationDto.getEvents()));
-            compilation.setEvents(events);
-        }
+            List<Event> events = eventRepository.findAllByEventIds(new ArrayList<>(newCompilationDto.getEvents()));
+
+            if (events.size() != newCompilationDto.getEvents().size()) throw new NotFoundException("Не все события найдены");
+            compilation.setEvents(new HashSet<>(events));
+
+        } else compilation.setEvents(new HashSet<>());
 
         Compilation savedCompilation = compilationRepository.save(compilation);
         return compilationMapper.toDto(savedCompilation);
@@ -89,31 +93,26 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Подборка с id = " + compId + " не найдена"));
 
-        if (updateCompilationRequest.getTitle() != null && !updateCompilationRequest.getTitle().isBlank()) {
-            if (!compilation.getTitle().equals(updateCompilationRequest.getTitle()) &&
-                    compilationRepository.existsByTitle(updateCompilationRequest.getTitle())) {
-                throw new ConflictException("Подборка с наименованием " + updateCompilationRequest.getTitle() + " уже существует");
-            }
-            compilation.setTitle(updateCompilationRequest.getTitle());
-        }
-
-        if (updateCompilationRequest.getPinned() != null) {
-            compilation.setPinned(updateCompilationRequest.getPinned());
+        if (updateCompilationRequest.getTitle() != null
+                && !updateCompilationRequest.getTitle().equals(compilation.getTitle())
+                && compilationRepository.existsByTitle(updateCompilationRequest.getTitle())) {
+            throw new ConflictException("Подборка с названием \"" + updateCompilationRequest.getTitle() + "\" уже существует");
         }
 
         if (updateCompilationRequest.getEvents() != null) {
             if (updateCompilationRequest.getEvents().isEmpty()) {
-                compilation.getEvents().clear();
+                compilation.setEvents(new HashSet<>());
             } else {
-                List<Event> foundEvents = eventRepository.findAllById(updateCompilationRequest.getEvents());
-
-                if (foundEvents.size() != updateCompilationRequest.getEvents().size()) {
+                List<Event> events = eventRepository.findAllByEventIds(new ArrayList<>(updateCompilationRequest.getEvents()));
+                if (events.size() != updateCompilationRequest.getEvents().size()) {
                     throw new NotFoundException("Некоторые события не найдены");
                 }
-                compilation.setEvents(new HashSet<>(foundEvents));
+                compilation.setEvents(new HashSet<>(events));
             }
         }
 
-        return compilationMapper.toDto(compilation);
+        compilationMapper.updateCompilationFromRequest(updateCompilationRequest, compilation);
+
+        return compilationMapper.toDto(compilationRepository.save(compilation));
     }
 }

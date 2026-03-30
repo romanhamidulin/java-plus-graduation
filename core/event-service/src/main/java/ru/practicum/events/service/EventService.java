@@ -1,23 +1,28 @@
 package ru.practicum.events.service;
 
+import org.springframework.data.domain.Pageable;
+import ru.practicum.dto.event.*;
+import ru.practicum.events.model.Event;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventService {
-    List<EventShortDto> getEventsByOwner(Long userId, Integer from, Integer size);
+    List<EventShortDto> getEventsByOwner(Long userId, Pageable pageable);
 
-    EventDto addEvent(Long userId, EventCreateDto eventCreateDto);
+    EventFullDto addEvent(Long userId, NewEventDto eventCreateDto);
 
-    List<EventShortDto> allEvents(EntityParam params, String ip);
+    List<EventShortDto> allEvents(SearchEventPublicRequest requestParams, Pageable pageable, String ip);
 
-    EventDto getEventByOwner(Long userId, Long eventId);
+    EventFullDto getEventByOwner(Long userId, Long eventId, String ip);
 
-    EventDto updateEvent(Long userId, Long eventId, EventUpdateDto eventUpdateDto);
+    EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest eventUpdateDto);
 
-    EventDto eventById(Long evenId, String ip);
+    EventFullDto eventById(Long evenId, String ip);
 
-    List<EventDto> getEvents(List<Long> users, List<String> states, List<Long> categories,
-                             LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size);
+    List<EventFullDto> getEventsAdmin(SearchEventAdminRequest request, Pageable pageable);
 
-    EventDto updateEvent(Long eventId, EventAdminUpdateDto updateRequest);
+    EventFullDto updateEventAdmin(Long eventId, UpdateEventAdminRequest request);
+
+    Event getEventOrThrow(Long eventId);
 }

@@ -73,8 +73,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void deleteById(Long catId) {
-        if (eventRepository.existsByCategory_Id(catId)) {
-            throw new ConflictException("Категория относиться к событию");
+        if (eventRepository.existsByCategoryId(catId)) {
+            throw new ConflictException("Категория относится к событию");
         }
         repository.deleteById(catId);
     }

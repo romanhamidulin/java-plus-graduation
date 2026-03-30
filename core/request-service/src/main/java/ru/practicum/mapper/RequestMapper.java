@@ -1,18 +1,16 @@
 package ru.practicum.mapper;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.request.dto.ParticipationRequestDto;
-import ru.practicum.request.model.Request;
+import org.mapstruct.Mapper;
+import ru.practicum.dto.request.ParticipationRequestDto;
+import ru.practicum.model.Request;
 
-@UtilityClass
-public class RequestMapper {
-    public ParticipationRequestDto toParticipationRequestDto(Request req) {
-        return ParticipationRequestDto.builder()
-                .id(req.getId())
-                .event(req.getEvent().getId())
-                .requester(req.getRequester().getId())
-                .created(req.getCreatedOn())
-                .status(req.getStatus())
-                .build();
-    }
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface RequestMapper {
+
+    ParticipationRequestDto toDto(Request request);
+
+    List<ParticipationRequestDto> toDtoList(List<Request> requests);
 }

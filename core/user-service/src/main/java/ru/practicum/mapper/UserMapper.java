@@ -1,56 +1,32 @@
 package ru.practicum.mapper;
 
-import lombok.experimental.UtilityClass;
-import ru.practicum.user.dto.NewUserRequest;
-import ru.practicum.user.dto.UserDto;
-import ru.practicum.user.dto.UserShortDto;
-import ru.practicum.user.model.User;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import ru.practicum.dto.user.NewUserRequest;
+import ru.practicum.dto.user.UserDto;
+import ru.practicum.dto.user.UserShortDto;
+import ru.practicum.model.User;
 
-@UtilityClass
-public class UserMapper {
-    public UserDto toUserDto(User user) {
-        if (user == null) {
-            return null;
-        }
+@Mapper(componentModel = "spring")
+public interface UserMapper {
 
-        UserDto dto = new UserDto();
-        dto.setId(user.getId());
-        dto.setName(user.getName());
-        dto.setEmail(user.getEmail());
-        return dto;
-    }
 
-    public User toUser(UserDto userDto) {
-        if (userDto == null) {
-            return null;
-        }
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "email", source = "email")
+    UserDto toUserDto(User user);
 
-        User user = new User();
-        user.setId(userDto.getId());
-        user.setName(userDto.getName());
-        user.setEmail(userDto.getEmail());
-        return user;
-    }
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "email", source = "email")
+    User toUser(UserDto userDto);
 
-    public User toNewUser(NewUserRequest newUserRequestDto) {
-        if (newUserRequestDto == null) {
-            return null;
-        }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "email", source = "email")
+    User toNewUser(NewUserRequest newUserRequestDto);
 
-        User user = new User();
-        user.setName(newUserRequestDto.getName());
-        user.setEmail(newUserRequestDto.getEmail());
-        return user;
-    }
-
-    public UserShortDto toUserShortDto(User user) {
-        if (user == null) {
-            return null;
-        }
-
-        UserShortDto dto = new UserShortDto();
-        dto.setId(user.getId());
-        dto.setName(user.getName());
-        return dto;
-    }
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "name", source = "name")
+    UserShortDto toUserShortDto(User user);
 }

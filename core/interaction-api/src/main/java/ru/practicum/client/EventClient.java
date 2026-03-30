@@ -4,7 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import ru.practicum.config.FeignRetryConfig;
-import ru.practicum.dto.event.EventDto;
+import ru.practicum.dto.event.EventFullDto;
 
 @FeignClient(
         name = "event-service",
@@ -15,5 +15,5 @@ import ru.practicum.dto.event.EventDto;
 public interface EventClient {
 
     @GetMapping("/{eventId}")
-    EventDto getEvent(@PathVariable Long eventId);
+    EventFullDto getEvent(@PathVariable Long eventId);
 }

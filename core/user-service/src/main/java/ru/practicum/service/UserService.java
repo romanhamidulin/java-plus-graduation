@@ -1,8 +1,9 @@
 package ru.practicum.service;
 
-import ru.practicum.user.dto.NewUserRequest;
-import ru.practicum.user.dto.UserDto;
-import ru.practicum.user.dto.UserRequest;
+import ru.practicum.dto.user.UserShortDto;
+import ru.practicum.dto.user.NewUserRequest;
+import ru.practicum.dto.user.UserDto;
+import ru.practicum.dto.user.UserRequest;
 
 import java.util.List;
 
@@ -12,4 +13,6 @@ public interface UserService {
     UserDto createUser(NewUserRequest newUserRequest);
 
     void deleteUser(Long userId);
+
+    UserShortDto getUserShortInfo(Long userId);
 }

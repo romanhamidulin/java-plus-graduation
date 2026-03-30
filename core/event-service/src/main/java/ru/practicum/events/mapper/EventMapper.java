@@ -1,126 +1,51 @@
 package ru.practicum.events.mapper;
 
-import lombok.experimental.UtilityClass;
-import ru.practicum.category.dto.CategoryDto;
+import org.mapstruct.*;
 import ru.practicum.category.mapper.CategoryMapper;
-import ru.practicum.events.dto.EventCreateDto;
-import ru.practicum.events.dto.EventDto;
-import ru.practicum.events.dto.EventShortDto;
-import ru.practicum.events.dto.LocationDto;
+import ru.practicum.category.model.Category;
+import ru.practicum.dto.event.*;
 import ru.practicum.events.model.Event;
-import ru.practicum.user.dto.UserShortDto;
-import ru.practicum.user.mapper.UserMapper;
 
-@UtilityClass
-public class EventMapper {
-    public EventDto mapToDto(Event event, Long confirmedRequest, Long views) {
-        EventDto.EventDtoBuilder builder = EventDto.builder()
-                .id(event.getId())
-                .title(event.getTitle())
-                .annotation(event.getAnnotation())
-                .description(event.getDescription())
-                .confirmedRequests(confirmedRequest != null ? confirmedRequest : 0L)
-                .views(views != null ? views : 0L)
-                .paid(event.getPaid())
-                .requestModeration(event.getRequestModeration())
-                .participantLimit(event.getParticipantLimit())
-                .location(LocationDto.builder()
-                        .lat(event.getLocation().getLat())
-                        .lon(event.getLocation().getLon())
-                        .build())
-                .state(event.getState())
-                .initiator(UserShortDto.builder()
-                        .id(event.getInitiator().getId())
-                        .name(event.getInitiator().getName())
-                        .build())
-                .eventDate(event.getEventDate())
-                .createdOn(event.getCreatedOn())
-                .publishedOn(event.getPublishedOn());
+@Mapper(componentModel = "spring", uses = {LocationMapper.class, CategoryMapper.class})
+public interface EventMapper {
 
-        if (event.getCategory() != null) {
-            builder.category(CategoryMapper.mapToDto(event.getCategory()));
-        }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "category", source = "category")
+    @Mapping(target = "initiatorId", source = "initiatorId")
+    @Mapping(target = "state", constant = "PENDING")
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "views", ignore = true)
+    Event toEntity(NewEventDto dto, Long initiatorId, Category category);
 
-        return builder.build();
-    }
+    @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "category", source = "category")
+    EventShortDto toShortDto(Event event);
 
-    public static EventShortDto mapToShortDto(Event event, Long confirmedRequest, Long views, Integer countOfComments) {
-        EventShortDto.EventShortDtoBuilder builder = EventShortDto.builder()
-                .id(event.getId())
-                .title(event.getTitle())
-                .annotation(event.getAnnotation())
-                .confirmedRequests(confirmedRequest != null ? confirmedRequest : 0L)
-                .views(views != null ? views : 0L)
-                .paid(event.getPaid())
-                .initiator(UserShortDto.builder()
-                        .id(event.getInitiator().getId())
-                        .name(event.getInitiator().getName())
-                        .build())
-                .countOfComments(countOfComments)
-                .eventDate(event.getEventDate());
+    @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "category", source = "category")
+    EventFullDto toFullDto(Event event);
 
-        if (event.getCategory() != null) {
-            builder.category(CategoryDto.builder()
-                    .id(event.getCategory().getId())
-                    .name(event.getCategory().getName())
-                    .build());
-        }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "initiatorId", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "views", ignore = true)
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEventFromUserRequest(UpdateEventUserRequest request, @MappingTarget Event event, Category category);
 
-        return builder.build();
-    }
-
-    public Event toEvent(EventCreateDto dto) {
-        Event event = new Event();
-        event.setTitle(dto.getTitle());
-        event.setAnnotation(dto.getAnnotation());
-        event.setDescription(dto.getDescription());
-        event.setEventDate(dto.getEventDate());
-        event.setPaid(dto.getPaid() != null ? dto.getPaid() : false);
-        event.setParticipantLimit(dto.getParticipantLimit() != null ? dto.getParticipantLimit() : 0);
-        event.setRequestModeration(dto.getRequestModeration() != null ? dto.getRequestModeration() : true);
-        return event;
-    }
-
-    public EventShortDto toEventShortDto(Event event) {
-        EventShortDto.EventShortDtoBuilder builder = EventShortDto.builder()
-                .id(event.getId())
-                .title(event.getTitle())
-                .annotation(event.getAnnotation())
-                .confirmedRequests(0L)
-                .views(0L)
-                .eventDate(event.getEventDate())
-                .paid(event.getPaid())
-                .initiator(UserMapper.toUserShortDto(event.getInitiator()));
-
-        if (event.getCategory() != null) {
-            builder.category(CategoryMapper.mapToDto(event.getCategory()));
-        }
-
-        return builder.build();
-    }
-
-    public EventDto toEventDto(Event event) {
-        EventDto.EventDtoBuilder builder = EventDto.builder()
-                .id(event.getId())
-                .title(event.getTitle())
-                .annotation(event.getAnnotation())
-                .description(event.getDescription())
-                .confirmedRequests(0L)
-                .views(0L)
-                .eventDate(event.getEventDate())
-                .paid(event.getPaid())
-                .requestModeration(event.getRequestModeration())
-                .participantLimit(event.getParticipantLimit())
-                .location(LocationMapper.toLocationDto(event.getLocation()))
-                .initiator(UserMapper.toUserShortDto(event.getInitiator()))
-                .state(event.getState())
-                .publishedOn(event.getPublishedOn())
-                .createdOn(event.getCreatedOn());
-
-        if (event.getCategory() != null) {
-            builder.category(CategoryMapper.mapToDto(event.getCategory()));
-        }
-
-        return builder.build();
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "initiatorId", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "views", ignore = true)
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEventFromAdminRequest(UpdateEventAdminRequest request, @MappingTarget Event event, Category category);
 }

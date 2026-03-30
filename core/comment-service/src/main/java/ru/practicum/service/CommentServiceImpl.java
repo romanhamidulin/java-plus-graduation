@@ -9,9 +9,8 @@ import ru.practicum.client.UserClient;
 import ru.practicum.dto.comment.AdminUpdateCommentStatusDto;
 import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.dto.comment.NewCommentDto;
-import ru.practicum.dto.event.EventDto;
+import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.enums.EventState;
-import ru.practicum.enums.RequestStatus;
 import ru.practicum.mapper.CommentMapper;
 import ru.practicum.enums.AdminUpdateCommentStatusAction;
 import ru.practicum.model.Comment;
@@ -36,7 +35,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto createComment(long authorId, long eventId, NewCommentDto newCommentDto) {
         checkUserExists(authorId);
 
-        EventDto event = eventClient.getEvent(eventId);
+        EventFullDto event = eventClient.getEvent(eventId);
 
         if (authorId == event.getInitiator().getId()) {
             throw new ConflictException("Инициатор мероприятия не может оставлять комментарии к нему");

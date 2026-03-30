@@ -1,8 +1,8 @@
 package ru.practicum.service;
 
-import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
-import ru.practicum.request.dto.EventRequestStatusUpdateResult;
-import ru.practicum.request.dto.ParticipationRequestDto;
+import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
+import ru.practicum.dto.request.EventRequestStatusUpdateResult;
+import ru.practicum.dto.request.ParticipationRequestDto;
 
 import java.util.List;
 

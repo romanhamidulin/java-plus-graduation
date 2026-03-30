@@ -2,8 +2,7 @@ package ru.practicum.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ru.practicum.events.model.Event;
-import ru.practicum.user.model.User;
+import ru.practicum.enums.RequestStatus;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
+@Builder
 @Entity
 @Table(name = "requests")
 public class Request {
@@ -19,17 +19,27 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id")
-    private Event event;
+    @Column(name = "event_id", nullable = false)
+    private Long eventId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requester_id")
-    private User requester;
+    @Column(name = "requester_id", nullable = false)
+    private Long requesterId;
 
     @Column(name = "created_at")
     private LocalDateTime createdOn;
 
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
+
+    public void confirmed() {
+        this.status = RequestStatus.CONFIRMED;
+    }
+
+    public void rejected() {
+        this.status = RequestStatus.REJECTED;
+    }
+
+    public void canceled() {
+        this.status = RequestStatus.CANCELED;
+    }
 }
