@@ -4,6 +4,7 @@ import org.mapstruct.*;
 import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.dto.comment.NewCommentDto;
 import ru.practicum.model.Comment;
+import ru.practicum.enums.CommentStatus;
 
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
