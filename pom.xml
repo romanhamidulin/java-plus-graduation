@@ -55,12 +55,12 @@
 			<dependency>
 				<groupId>org.mapstruct</groupId>
 				<artifactId>mapstruct</artifactId>
-				<version>${maprstruct.version}</version>
+				<version>${mapstruct.version}</version>  <!-- Fixed property name -->
 			</dependency>
 			<dependency>
 				<groupId>org.mapstruct</groupId>
 				<artifactId>mapstruct-processor</artifactId>
-				<version>${maprstruct.version}</version>
+				<version>${mapstruct.version}</version>  <!-- Fixed property name -->
 			</dependency>
 			<dependency>
 				<groupId>com.querydsl</groupId>
