@@ -10,7 +10,7 @@ import ru.practicum.enums.RequestStatus;
 import java.util.List;
 import java.util.Optional;
 
-public interface RequestRepository extends JpaRepository<Request, Long>, QuerydslPredicateExecutor<Request> {
+public interface RequestRepository extends JpaRepository<Request, Long> {
     boolean existsByRequesterIdAndEventId(Long requesterId, Long eventId);
 
     List<Request> findByRequesterId(Long requesterId);
