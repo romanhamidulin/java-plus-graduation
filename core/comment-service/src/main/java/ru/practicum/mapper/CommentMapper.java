@@ -13,7 +13,7 @@ public interface CommentMapper {
     @Mapping(target = "created", ignore = true)
     @Mapping(target = "userId", source = "userId")
     @Mapping(target = "eventId", source = "eventId")
-    @Mapping(target = "status", expression = "java(CommentStatus.PENDING)")
+    @Mapping(target = "status", expression = "java(ru.practicum.enums.CommentStatus.PENDING)")
     Comment toComment(NewCommentDto newCommentDto, Long userId, Long eventId);
 
     @Mapping(target = "userId", source = "userId")
