@@ -17,8 +17,10 @@ public class ParticipationRequestDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
+    @JsonProperty("event")
     private Long event;
 
+    @JsonProperty("requester")
     private Long requester;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
