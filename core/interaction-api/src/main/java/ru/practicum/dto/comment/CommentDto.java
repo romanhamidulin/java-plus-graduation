@@ -18,7 +18,7 @@ public class CommentDto {
     private long eventId;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private long authorId;
+    private long userId;
 
     private String created;
 
