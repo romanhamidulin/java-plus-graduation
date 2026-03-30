@@ -2,6 +2,7 @@ package ru.practicum.dto.comment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import ru.practicum.enums.CommentStatus;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,5 +23,5 @@ public class CommentDto {
 
     private String created;
 
-    private String status;
+    private CommentStatus status;
 }
