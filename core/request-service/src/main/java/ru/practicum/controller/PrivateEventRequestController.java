@@ -21,14 +21,13 @@ import java.util.List;
 public class PrivateEventRequestController {
     private final RequestService requestService;
 
-    @PatchMapping
-    @GetMapping("/{eventId}/requests")
+    @GetMapping
     public List<ParticipationRequestDto> getUserEventRequests(@PathVariable Long userId,
                                                               @PathVariable Long eventId) {
         return requestService.getUserEventRequests(userId, eventId);
     }
 
-    @PatchMapping("/{eventId}/requests")
+    @PatchMapping
     public EventRequestStatusUpdateResult updateUserEventRequests(@PathVariable Long userId,
                                                                   @PathVariable Long eventId,
                                                                   @Valid @RequestBody EventRequestStatusUpdateRequest dto) {
