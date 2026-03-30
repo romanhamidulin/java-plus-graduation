@@ -2,6 +2,7 @@ package ru.practicum.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.enums.RequestStatus;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ public class Request {
     @Column(name = "requester_id", nullable = false)
     private Long requesterId;
 
+    @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdOn;
 
