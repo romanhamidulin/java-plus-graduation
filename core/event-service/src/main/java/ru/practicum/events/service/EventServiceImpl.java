@@ -29,6 +29,7 @@ import ru.practicum.exception.ValidationException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -238,7 +239,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto eventById(Long eventId, String ip) {
+    public EventFullDto eventById(Long eventId, String ip, Long userId) {
         Event event = eventRepository.findById(eventId)
                 .filter(ev -> ev.getState() == EventState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Событие c id " + eventId + " не найдено"));
@@ -465,6 +466,16 @@ public class EventServiceImpl implements EventService {
     public Event getEventOrThrow(Long eventId) {
         return eventRepository.findByIdNew(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие c id " + eventId + " не найдено"));
+    }
+
+    @Override
+    public Stream<RecommendedEventProto> getRecommendations(Long userId, int maxResults) {
+        return Stream.empty();
+    }
+
+    @Override
+    public void likeEvent(Long userId, Long eventId) {
+
     }
 
     private Long getEventIdFromUri(String uri) {

@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.client.StatsClient;
@@ -14,6 +15,7 @@ import ru.practicum.dto.event.SearchEventPublicRequest;
 import ru.practicum.events.service.EventService;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 
 @RestController
@@ -35,7 +37,25 @@ public class EventPublicController {
     }
 
     @GetMapping("/{eventId}")
-    public EventFullDto findEventById(@Positive @PathVariable Long eventId, HttpServletRequest request) {
-        return service.eventById(eventId, request.getRemoteAddr());
+    public EventFullDto findEventById(@PathVariable("id") @Positive Long eventId, HttpServletRequest request,
+                                      @RequestHeader("X-EWM-USER-ID") Long userId) {
+        return service.eventById(eventId, request.getRemoteAddr(), userId);
+    }
+
+    @GetMapping("/recommendations")
+    public Stream<RecommendedEventProto> getRecommendations(
+            @RequestHeader("X-EWM-USER-ID") Long userId,
+            @RequestParam(defaultValue = "10") int maxResults) {
+
+        return service.getRecommendations(userId, maxResults);
+    }
+
+    @PutMapping("/{eventId}/like")
+    @ResponseStatus(HttpStatus.OK)
+    public void likeEvent(
+            @PathVariable Long eventId,
+            @RequestHeader("X-EWM-USER-ID") Long userId) {
+
+        service.likeEvent(userId, eventId);
     }
 }
