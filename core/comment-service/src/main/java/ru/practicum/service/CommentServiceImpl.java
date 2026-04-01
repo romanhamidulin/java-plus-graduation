@@ -43,9 +43,6 @@ public class CommentServiceImpl implements CommentService {
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Мероприятие должно быть опубликовано");
         }
-        //if (requestRepository.findByRequesterIdAndEventIdAndStatus(authorId, eventId, RequestStatus.CONFIRMED).isEmpty()) {
-        //    throw new ConflictException("Комментарии может оставлять только подтвержденный участник мероприятия");
-        //}
         Comment comment = commentMapper.toComment(newCommentDto, authorId, eventId);
         commentRepository.save(comment);
         return commentMapper.toDto(comment);

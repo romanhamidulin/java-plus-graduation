@@ -116,19 +116,19 @@ public class ErrorHandler {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null, request);
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ApiError handleUnexpected(Exception exception, HttpServletRequest request) {
+    public ApiError handleUnexpected(Throwable exception, HttpServletRequest request) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception, request);
     }
 
     private ApiError buildResponse(
-            HttpStatus httpStatus,Exception exception, HttpServletRequest request) {
+            HttpStatus httpStatus,Throwable exception, HttpServletRequest request) {
         return buildResponse(httpStatus, exception.getMessage(), exception, request);
     }
 
     private ApiError buildResponse(
-            HttpStatus httpStatus, String message, Exception exception, HttpServletRequest request) {
+            HttpStatus httpStatus, String message, Throwable exception, HttpServletRequest request) {
         String path = request.getRequestURI();
         String httpMethod = request.getMethod();
         int statusCode = httpStatus.value();
