@@ -36,7 +36,7 @@ public class EventPublicController {
     }
 
     @GetMapping("/{eventId}")
-    public EventFullDto findEventById(@PathVariable("id") @Positive Long eventId, HttpServletRequest request,
+    public EventFullDto findEventById(@PathVariable @Positive Long eventId, HttpServletRequest request,
                                       @RequestHeader("X-EWM-USER-ID") Long userId) {
         return service.eventById(eventId, request.getRemoteAddr(), userId);
     }
