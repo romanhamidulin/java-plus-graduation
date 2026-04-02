@@ -19,4 +19,10 @@ public class InternalRequestController {
     public Long countByStatus(@PathVariable Long eventId, @PathVariable RequestStatus status) {
         return requestRepository.countByEventIdAndStatus(eventId, status);
     }
+
+    @GetMapping("/user/{userId}/event/{eventId}/confirmed")
+    public Boolean hasUserConfirmedRequest(@PathVariable Long userId, @PathVariable Long eventId) {
+        return requestRepository.existsByRequesterIdAndEventIdAndStatus(
+                userId, eventId, RequestStatus.CONFIRMED);
+    }
 }
