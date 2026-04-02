@@ -1,3 +1,5 @@
+CREATE SCHEMA IF NOT EXISTS stats_analyzer;
+
 CREATE TABLE IF NOT EXISTS stats_analyzer.user_actions (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id BIGINT NOT NULL,
