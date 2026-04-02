@@ -8,11 +8,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.client.StatsClient;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.SearchEventPublicRequest;
 import ru.practicum.events.service.EventService;
+import ru.practicum.ewm.stats.proto.RecommendedEventProto;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 @Validated
 public class EventPublicController {
     private final EventService service;
-    private final StatsClient statClient;
     private static final String MAIN_SERVICE = "ewm-main-service";
 
     @GetMapping

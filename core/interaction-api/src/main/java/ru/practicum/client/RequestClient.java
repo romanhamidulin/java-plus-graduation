@@ -24,4 +24,7 @@ public interface RequestClient {
 
     @PostMapping("/events/count/confirmed")
     Map<Long, Long> getConfirmedRequestsCount(@RequestBody List<Long> eventIds);
+
+    @GetMapping("/internal/requests/user/{userId}/event/{eventId}/confirmed")
+    Boolean hasUserConfirmedRequest(@PathVariable Long userId, @PathVariable Long eventId);
 }
